@@ -1,0 +1,120 @@
+import React, { useState } from "react";
+import { Box, Container, TextField, Alert } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { Typography } from "../atoms/Typography";
+import { Button } from "../atoms/Button";
+import { supabase } from "../lib/supabase";
+import EmojiNatureIcon from "@mui/icons-material/EmojiNature";
+
+export const Login: React.FC = () => {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+      navigate("/boards");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Box className="min-h-screen bg-amber-50 relative flex items-center justify-center">
+      <Box className="absolute top-10 left-10 animate-bounce">
+        <EmojiNatureIcon sx={{ fontSize: 32, color: "#fbbf24" }} />
+      </Box>
+      <Box className="absolute bottom-10 right-10 animate-bounce delay-100">
+        <EmojiNatureIcon sx={{ fontSize: 32, color: "#fbbf24" }} />
+      </Box>
+
+      <Container maxWidth="sm">
+        <Box
+          component="form"
+          onSubmit={handleLogin}
+          className="bg-white p-8 rounded-xl shadow-lg transform transition-all hover:scale-[1.01]"
+        >
+          <Box className="text-center space-y-2 mb-6">
+            <Typography variant="h4" className="font-bold text-amber-800">
+              Welcome to TaskBees! 🐝
+            </Typography>
+            <Typography variant="body1" className="text-amber-600">
+              Where productivity meets honey-sweet organization
+            </Typography>
+          </Box>
+
+          {error && (
+            <Alert severity="error" className="mb-4">
+              {error}
+            </Alert>
+          )}
+
+          <Box className="space-y-4">
+            <Box className="space-y-2">
+              <Typography variant="body2" className="font-medium text-amber-700">
+                Email
+              </Typography>
+              <TextField
+                fullWidth
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="buzz@taskbees.com"
+                required
+                className="border-amber-200 focus:border-amber-400"
+              />
+            </Box>
+
+            <Box className="space-y-2">
+              <Typography variant="body2" className="font-medium text-amber-700">
+                Password
+              </Typography>
+              <TextField
+                fullWidth
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                className="border-amber-200 focus:border-amber-400"
+              />
+            </Box>
+
+            <Button
+              fullWidth
+              type="submit"
+              disabled={loading}
+              className="bg-amber-500 hover:bg-amber-600 text-white"
+            >
+              {loading ? "Buzzing in..." : "Buzz In"}
+            </Button>
+
+            <Box className="text-center">
+              <Button
+                variant="secondary"
+                onClick={() => navigate("/register")}
+                className="text-amber-600 hover:text-amber-700"
+              >
+                New to the hive? Register now! 🍯
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      </Container>
+    </Box>
+  );
+};

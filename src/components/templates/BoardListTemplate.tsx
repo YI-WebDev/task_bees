@@ -1,0 +1,183 @@
+import React from "react";
+import { Grid, TextField, InputAdornment } from "@mui/material";
+import { Search, Edit, Trash2, MoreVertical, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Typography } from "../atoms/Typography";
+import { Button } from "../atoms/Button";
+import { Card } from "../atoms/Card";
+import { Box } from "../atoms/Box";
+import { IconButton } from "../atoms/IconButton";
+import { Menu } from "../atoms/Menu";
+import { MenuItem } from "../atoms/MenuItem";
+import { Container } from "../molecules/layout/Container";
+import { LoadingSpinner } from "../molecules/feedback/LoadingSpinner";
+import { ErrorMessage } from "../molecules/feedback/ErrorMessage";
+import { EmptyState } from "../molecules/data-display/EmptyState";
+import { Header } from "../organisms/Header";
+import type { Board } from "../../types/types";
+
+interface BoardListTemplateProps {
+  boards: Board[];
+  loading: boolean;
+  error: string | null;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  onCreateBoard: () => void;
+  onEditBoard: (board: Board) => void;
+  onDeleteBoard: (board: Board) => void;
+  menuAnchorEl: { [key: string]: HTMLElement | null };
+  onMenuOpen: (event: React.MouseEvent<HTMLElement>, boardId: string) => void;
+  onMenuClose: (boardId: string) => void;
+}
+
+export const BoardListTemplate: React.FC<BoardListTemplateProps> = ({
+  boards,
+  loading,
+  error,
+  searchQuery,
+  onSearchChange,
+  onCreateBoard,
+  onEditBoard,
+  onDeleteBoard,
+  menuAnchorEl,
+  onMenuOpen,
+  onMenuClose,
+}) => {
+  const navigate = useNavigate();
+
+  if (loading) {
+    return <LoadingSpinner fullScreen />;
+  }
+
+  if (error) {
+    return <ErrorMessage message={error} fullScreen showBackButton />;
+  }
+
+  const filteredBoards = boards.filter(board =>
+    board.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  return (
+    <Box className="min-h-screen bg-amber-50">
+      <Header />
+      <Container maxWidth="xl" className="py-8">
+        <Box className="flex justify-between items-center mb-8">
+          <Typography variant="h4" className="font-bold text-amber-800">
+            My Boards
+          </Typography>
+          <Box className="flex items-center gap-4">
+            <TextField
+              value={searchQuery}
+              onChange={e => onSearchChange(e.target.value)}
+              placeholder="Search boards..."
+              className="w-64"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search className="w-4 h-4 text-amber-500" />
+                  </InputAdornment>
+                ),
+                sx: {
+                  "& input": {
+                    padding: "8px 14px",
+                  },
+                },
+              }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                },
+              }}
+            />
+            <Button onClick={onCreateBoard} icon={<Plus className="w-4 h-4" />}>
+              Create Board
+            </Button>
+          </Box>
+        </Box>
+
+        {filteredBoards.length === 0 && searchQuery && (
+          <EmptyState
+            title="No boards found"
+            message={`No boards found matching "${searchQuery}"`}
+            icon={<Search className="w-8 h-8 text-amber-400" />}
+          />
+        )}
+
+        <Grid container spacing={3}>
+          {filteredBoards.map(board => (
+            <Grid item xs={12} sm={6} md={4} key={board.id}>
+              <Card
+                className="group hover:shadow-lg transition-all duration-200 cursor-pointer border border-amber-100"
+                onClick={() => navigate(`/board/${board.id}`)}
+              >
+                <Box className="p-6 space-y-3">
+                  <Box className="flex justify-between items-start">
+                    <Box>
+                      <Typography
+                        variant="h6"
+                        className="text-amber-800 group-hover:text-amber-600"
+                      >
+                        {board.name}
+                      </Typography>
+                      <Typography variant="body2" className="text-amber-600">
+                        Created {new Date(board.created_at).toLocaleDateString()}
+                      </Typography>
+                    </Box>
+                    <IconButton
+                      onClick={e => onMenuOpen(e, board.id)}
+                      className="text-amber-400 hover:text-amber-600"
+                    >
+                      <MoreVertical className="w-4 h-4" />
+                    </IconButton>
+                  </Box>
+
+                  <Box className="flex space-x-2">
+                    <Box className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                      {board.total_tasks} tasks
+                    </Box>
+                    {board.completed_tasks > 0 && (
+                      <Box className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        {board.completed_tasks} completed
+                      </Box>
+                    )}
+                  </Box>
+                </Box>
+
+                <Menu
+                  anchorEl={menuAnchorEl[board.id]}
+                  open={Boolean(menuAnchorEl[board.id])}
+                  onClose={() => onMenuClose(board.id)}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <MenuItem
+                    onClick={() => onEditBoard(board)}
+                    sx={{
+                      color: "warning.dark",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
+                  >
+                    <Edit size={16} />
+                    Edit
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => onDeleteBoard(board)}
+                    sx={{
+                      color: "error.main",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
+                  >
+                    <Trash2 size={16} />
+                    Delete
+                  </MenuItem>
+                </Menu>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
+    </Box>
+  );
+};
