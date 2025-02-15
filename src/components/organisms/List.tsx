@@ -259,7 +259,7 @@ export const List: React.FC<ListProps> = ({
         <MenuItem
           onClick={handleEditClick}
           sx={{
-            color: "warning.dark",
+            color: "primary.dark",
             display: "flex",
             alignItems: "center",
             gap: 1,

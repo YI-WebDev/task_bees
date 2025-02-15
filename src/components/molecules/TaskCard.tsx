@@ -69,8 +69,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onDragStart, onEdit, o
               onClick={handleClick}
               size="small"
               sx={{
-                color: "warning.main",
-                "&:hover": { backgroundColor: "warning.light" },
+                color: "primary.main",
+                "&:hover": { backgroundColor: "primary.light" },
               }}
             >
               <MoreVertical size={16} />
@@ -79,7 +79,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onDragStart, onEdit, o
           <Typography variant="body2" className="mb-2 text-gray-600">
             {task.description}
           </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", color: "warning.main" }}>
+          <Box sx={{ display: "flex", alignItems: "center", color: "primary.main" }}>
             <Clock size={12} style={{ marginRight: 4 }} />
             <Typography variant="caption">
               {new Date(task.created_at).toLocaleDateString()}
@@ -92,7 +92,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onDragStart, onEdit, o
           onClose={handleClose}
           onClick={e => e.stopPropagation()}
         >
-          <MenuItem onClick={handleEdit} sx={{ color: "warning.dark" }}>
+          <MenuItem onClick={handleEdit} sx={{ color: "primary.dark" }}>
             <Edit size={16} style={{ marginRight: 8 }} />
             Edit
           </MenuItem>
