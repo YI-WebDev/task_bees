@@ -4,7 +4,7 @@
   1. Tables
     - workspaces: Container for boards
     - boards: Kanban boards
-    - columns: Board columns
+    - lists: Task lists
     - tasks: Individual tasks
     - profiles: Basic user profiles
 
@@ -21,7 +21,7 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users CASCADE;
 DROP FUNCTION IF EXISTS public.handle_new_user() CASCADE;
 DROP FUNCTION IF EXISTS update_task_positions() CASCADE;
 DROP TABLE IF EXISTS tasks CASCADE;
-DROP TABLE IF EXISTS columns CASCADE;
+DROP TABLE IF EXISTS lists CASCADE;
 DROP TABLE IF EXISTS boards CASCADE;
 DROP TABLE IF EXISTS workspaces CASCADE;
 DROP TABLE IF EXISTS profiles CASCADE;
@@ -42,7 +42,7 @@ CREATE TABLE boards (
   position integer NOT NULL DEFAULT 0
 );
 
-CREATE TABLE columns (
+CREATE TABLE lists (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   title text NOT NULL,
   board_id uuid REFERENCES boards ON DELETE CASCADE NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE tasks (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   title text NOT NULL,
   description text,
-  column_id uuid REFERENCES columns ON DELETE CASCADE NOT NULL,
+  column_id uuid REFERENCES lists ON DELETE CASCADE NOT NULL,
   position integer NOT NULL DEFAULT 0,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now(),
@@ -71,7 +71,7 @@ CREATE TABLE profiles (
 -- Enable Row Level Security
 ALTER TABLE workspaces ENABLE ROW LEVEL SECURITY;
 ALTER TABLE boards ENABLE ROW LEVEL SECURITY;
-ALTER TABLE columns ENABLE ROW LEVEL SECURITY;
+ALTER TABLE lists ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
@@ -94,29 +94,29 @@ CREATE POLICY "Users can view and manage boards in their workspaces"
     )
   );
 
-CREATE POLICY "Users can view and manage columns in their boards"
-  ON columns
+CREATE POLICY "Users can view and manage lists in their boards"
+  ON lists
   FOR ALL
   TO authenticated
   USING (
     EXISTS (
       SELECT 1 FROM boards
       JOIN workspaces ON workspaces.id = boards.workspace_id
-      WHERE boards.id = columns.board_id
+      WHERE boards.id = lists.board_id
       AND workspaces.owner_id = auth.uid()
     )
   );
 
-CREATE POLICY "Users can view and manage tasks in their columns"
+CREATE POLICY "Users can view and manage tasks in their lists"
   ON tasks
   FOR ALL
   TO authenticated
   USING (
     EXISTS (
-      SELECT 1 FROM columns
-      JOIN boards ON boards.id = columns.board_id
+      SELECT 1 FROM lists
+      JOIN boards ON boards.id = lists.board_id
       JOIN workspaces ON workspaces.id = boards.workspace_id
-      WHERE columns.id = tasks.column_id
+      WHERE lists.id = tasks.column_id
       AND workspaces.owner_id = auth.uid()
     )
   );
@@ -130,7 +130,7 @@ CREATE POLICY "Users can manage their own profile"
 
 -- Create indexes for better performance
 CREATE INDEX idx_boards_workspace_id ON boards(workspace_id);
-CREATE INDEX idx_columns_board_id ON columns(board_id);
+CREATE INDEX idx_lists_board_id ON lists(board_id);
 CREATE INDEX idx_tasks_column_id ON tasks(column_id);
 CREATE INDEX idx_tasks_created_by ON tasks(created_by);
 CREATE INDEX idx_tasks_is_completed ON tasks(is_completed);

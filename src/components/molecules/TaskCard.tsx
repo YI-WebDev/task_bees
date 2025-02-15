@@ -82,7 +82,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onDragStart, onEdit, o
           <Box sx={{ display: "flex", alignItems: "center", color: "warning.main" }}>
             <Clock size={12} style={{ marginRight: 4 }} />
             <Typography variant="caption">
-              {new Date(task.createdAt).toLocaleDateString()}
+              {new Date(task.created_at).toLocaleDateString()}
             </Typography>
           </Box>
         </Box>

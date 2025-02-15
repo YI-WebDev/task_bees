@@ -2,50 +2,50 @@ import React, { useState, useEffect } from "react";
 import { Box } from "../atoms/Box";
 import { Container } from "@mui/material";
 import { Header } from "../organisms/Header";
-import { Column } from "../organisms/Column";
-import { Column as ColumnType, Board } from "../../types/types";
+import { List } from "../organisms/List";
+import { List as ListType, Board } from "../../types/types";
 import { Button } from "../atoms/Button";
 import { Plus } from "lucide-react";
-import { CreateColumnModal } from "../molecules/CreateColumnModal";
-import { EditColumnModal } from "../molecules/EditColumnModal";
-import { deleteColumn, getBoards } from "../services/boardService";
+import { CreateListModal } from "../molecules/CreateListModal";
+import { EditListModal } from "../molecules/EditListModal";
+import { deleteList, getBoards } from "../services/boardService";
 import { EmptyState } from "../molecules/data-display/EmptyState";
 import { Sidebar } from "../molecules/navigation/Sidebar";
 import { CreateBoardModal } from "../molecules/CreateBoardModal";
 
 interface DashboardTemplateProps {
   boardId: string;
-  columns: ColumnType[];
+  lists: ListType[];
   onDragStart: (
     e: React.DragEvent,
     taskId: string,
-    sourceColumnId: string,
+    sourceListId: string,
     currentIndex: number
   ) => void;
   onDragOver: (e: React.DragEvent) => void;
-  onDrop: (e: React.DragEvent, columnId: string, dropIndex: number) => void;
-  onCreateTask: (data: { title: string; description: string; columnId: string }) => Promise<void>;
+  onDrop: (e: React.DragEvent, listId: string, dropIndex: number) => void;
+  onCreateTask: (data: { title: string; description: string; listId: string }) => Promise<void>;
   onTaskDeleted: () => void;
-  onColumnCreated: () => void;
-  onColumnUpdated: () => void;
-  onColumnDeleted: () => void;
+  onListCreated: () => void;
+  onListUpdated: () => void;
+  onListDeleted: () => void;
 }
 
 export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
   boardId,
-  columns,
+  lists,
   onDragStart,
   onDragOver,
   onDrop,
   onCreateTask,
   onTaskDeleted,
-  onColumnCreated,
-  onColumnUpdated,
-  onColumnDeleted,
+  onListCreated,
+  onListUpdated,
+  onListDeleted,
 }) => {
-  const [isCreateColumnModalOpen, setIsCreateColumnModalOpen] = useState(false);
+  const [isCreateListModalOpen, setIsCreateListModalOpen] = useState(false);
   const [isCreateBoardModalOpen, setIsCreateBoardModalOpen] = useState(false);
-  const [editingColumn, setEditingColumn] = useState<ColumnType | null>(null);
+  const [editingList, setEditingList] = useState<ListType | null>(null);
   const [boards, setBoards] = useState<Board[]>([]);
   const [loadingBoards, setLoadingBoards] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -65,12 +65,12 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
     loadBoards();
   }, []);
 
-  const handleDeleteColumn = async (columnId: string) => {
+  const handleDeleteList = async (listId: string) => {
     try {
-      await deleteColumn(columnId);
-      onColumnDeleted();
+      await deleteList(listId);
+      onListDeleted();
     } catch (error) {
-      console.error("Failed to delete column:", error);
+      console.error("Failed to delete list:", error);
     }
   };
 
@@ -104,11 +104,11 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
         >
           <Box className="flex items-center mb-6">
             <Button
-              onClick={() => setIsCreateColumnModalOpen(true)}
+              onClick={() => setIsCreateListModalOpen(true)}
               icon={<Plus className="w-4 h-4" />}
               className="bg-white text-amber-600 hover:bg-amber-50"
             >
-              Add Column
+              Add List
             </Button>
           </Box>
 
@@ -121,26 +121,26 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
               alignItems: "flex-start",
             }}
           >
-            {columns.map(column => (
-              <Column
-                key={column.id}
-                column={column}
+            {lists.map(list => (
+              <List
+                key={list.id}
+                list={list}
                 onDragStart={onDragStart}
                 onDragOver={onDragOver}
                 onDrop={onDrop}
                 onTaskDeleted={onTaskDeleted}
-                onEditColumn={() => setEditingColumn(column)}
-                onDeleteColumn={() => handleDeleteColumn(column.id)}
+                onEditList={() => setEditingList(list)}
+                onDeleteList={() => handleDeleteList(list.id)}
                 onCreateTask={onCreateTask}
               />
             ))}
 
-            {columns.length === 0 && (
+            {lists.length === 0 && (
               <EmptyState
-                title="No columns yet"
-                message="Create your first column to start organizing tasks"
-                actionLabel="Create Your First Column"
-                onAction={() => setIsCreateColumnModalOpen(true)}
+                title="No lists yet"
+                message="Create your first list to start organizing tasks"
+                actionLabel="Create Your First List"
+                onAction={() => setIsCreateListModalOpen(true)}
                 icon={<Plus className="w-8 h-8 text-amber-400" />}
               />
             )}
@@ -148,19 +148,19 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
         </Container>
       </Box>
 
-      <CreateColumnModal
-        open={isCreateColumnModalOpen}
-        onClose={() => setIsCreateColumnModalOpen(false)}
-        onColumnCreated={onColumnCreated}
+      <CreateListModal
+        open={isCreateListModalOpen}
+        onClose={() => setIsCreateListModalOpen(false)}
+        onListCreated={onListCreated}
         boardId={boardId}
       />
 
-      {editingColumn && (
-        <EditColumnModal
-          open={!!editingColumn}
-          onClose={() => setEditingColumn(null)}
-          onColumnUpdated={onColumnUpdated}
-          column={editingColumn}
+      {editingList && (
+        <EditListModal
+          open={!!editingList}
+          onClose={() => setEditingList(null)}
+          onListUpdated={onListUpdated}
+          list={editingList}
         />
       )}
 

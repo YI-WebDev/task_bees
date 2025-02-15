@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { DashboardTemplate } from "../templates/DashboardTemplate";
-import { Column } from "../../types/types";
-import { getColumns, getTasks, updateTaskPositions, createTask } from "../services/boardService";
+import { List } from "../../types/types";
+import { getLists, getTasks, updateTaskPositions, createTask } from "../services/boardService";
 import { useAuth } from "../contexts/AuthContext";
 import { LoadingSpinner } from "../molecules/feedback/LoadingSpinner";
 import { ErrorMessage } from "../molecules/feedback/ErrorMessage";
@@ -10,7 +10,7 @@ import { checkSupabaseConnection, handleSupabaseError } from "../lib/supabase";
 
 export const Dashboard: React.FC = () => {
   const { boardId } = useParams();
-  const [columns, setColumns] = useState<Column[]>([]);
+  const [lists, setLists] = useState<List[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
@@ -32,13 +32,13 @@ export const Dashboard: React.FC = () => {
         throw new Error("Unable to connect to the server. Please check your internet connection.");
       }
 
-      const columnsData = await getColumns(boardId);
+      const listsData = await getLists(boardId);
 
-      const columnsWithTasks = await Promise.all(
-        columnsData.map(async column => {
-          const tasks = await getTasks(column.id);
+      const listsWithTasks = await Promise.all(
+        listsData.map(async list => {
+          const tasks = await getTasks(list.id);
           return {
-            ...column,
+            ...list,
             tasks: tasks.map(task => ({
               ...task,
               columnId: task.column_id,
@@ -49,7 +49,7 @@ export const Dashboard: React.FC = () => {
         })
       );
 
-      setColumns(columnsWithTasks);
+      setLists(listsWithTasks);
     } catch (err) {
       console.error("Error loading board data:", err);
       setError(handleSupabaseError(err));
@@ -67,7 +67,7 @@ export const Dashboard: React.FC = () => {
   const handleCreateTask = async (data: {
     title: string;
     description: string;
-    columnId: string;
+    listId: string;
   }) => {
     if (!user) return;
 
@@ -75,27 +75,27 @@ export const Dashboard: React.FC = () => {
       const newTask = await createTask({
         title: data.title,
         description: data.description,
-        column_id: data.columnId,
+        list_id: data.listId,
         created_by: user.id,
       });
 
-      setColumns(prevColumns => {
-        return prevColumns.map(column => {
-          if (column.id === data.columnId) {
+      setLists(prevLists => {
+        return prevLists.map(list => {
+          if (list.id === data.listId) {
             return {
-              ...column,
+              ...list,
               tasks: [
-                ...column.tasks,
+                ...list.tasks,
                 {
                   ...newTask,
-                  columnId: newTask.column_id,
+                  listId: newTask.list_id,
                   createdAt: new Date(newTask.created_at),
                   updatedAt: new Date(newTask.updated_at || newTask.created_at),
                 },
               ],
             };
           }
-          return column;
+          return list;
         });
       });
     } catch (error) {
@@ -117,7 +117,7 @@ export const Dashboard: React.FC = () => {
     e.preventDefault();
   };
 
-  const handleDrop = async (e: React.DragEvent, targetColumnId: string, dropIndex: number) => {
+  const handleDrop = async (e: React.DragEvent, targetListId: string, dropIndex: number) => {
     e.preventDefault();
 
     if (!draggedTask) return;
@@ -125,38 +125,38 @@ export const Dashboard: React.FC = () => {
     const { sourceColumnId, currentIndex } = draggedTask;
 
     try {
-      setColumns(prevColumns => {
-        const newColumns = [...prevColumns];
-        const sourceColumn = newColumns.find(col => col.id === sourceColumnId);
-        const targetColumn = newColumns.find(col => col.id === targetColumnId);
+      setLists(prevLists => {
+        const newLists = [...prevLists];
+        const sourceList = newLists.find(list => list.id === sourceColumnId);
+        const targetList = newLists.find(list => list.id === targetListId);
 
-        if (!sourceColumn || !targetColumn) return prevColumns;
+        if (!sourceList || !targetList) return prevLists;
 
-        const taskToMove = sourceColumn.tasks[currentIndex];
+        const taskToMove = sourceList.tasks[currentIndex];
 
-        if (!taskToMove) return prevColumns;
+        if (!taskToMove) return prevLists;
 
-        sourceColumn.tasks = sourceColumn.tasks.filter((_, index) => index !== currentIndex);
+        sourceList.tasks = sourceList.tasks.filter((_, index) => index !== currentIndex);
 
-        if (sourceColumnId === targetColumnId) {
+        if (sourceColumnId === targetListId) {
           const adjustedDropIndex = dropIndex > currentIndex ? dropIndex - 1 : dropIndex;
-          sourceColumn.tasks.splice(adjustedDropIndex, 0, taskToMove);
+          sourceList.tasks.splice(adjustedDropIndex, 0, taskToMove);
 
-          const taskIds = sourceColumn.tasks.map(task => task.id);
+          const taskIds = sourceList.tasks.map(task => task.id);
           updateTaskPositions(sourceColumnId, taskIds).catch(console.error);
         } else {
-          targetColumn.tasks.splice(dropIndex, 0, taskToMove);
+          targetList.tasks.splice(dropIndex, 0, taskToMove);
 
-          const sourceTaskIds = sourceColumn.tasks.map(task => task.id);
-          const targetTaskIds = targetColumn.tasks.map(task => task.id);
+          const sourceTaskIds = sourceList.tasks.map(task => task.id);
+          const targetTaskIds = targetList.tasks.map(task => task.id);
 
           Promise.all([
             updateTaskPositions(sourceColumnId, sourceTaskIds),
-            updateTaskPositions(targetColumnId, targetTaskIds),
+            updateTaskPositions(targetListId, targetTaskIds),
           ]).catch(console.error);
         }
 
-        return newColumns;
+        return newLists;
       });
     } catch (err) {
       console.error("Error updating task positions:", err);
@@ -177,15 +177,15 @@ export const Dashboard: React.FC = () => {
   return (
     <DashboardTemplate
       boardId={boardId!}
-      columns={columns}
+      lists={lists}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       onCreateTask={handleCreateTask}
       onTaskDeleted={loadBoardData}
-      onColumnCreated={loadBoardData}
-      onColumnUpdated={loadBoardData}
-      onColumnDeleted={loadBoardData}
+      onListCreated={loadBoardData}
+      onListUpdated={loadBoardData}
+      onListDeleted={loadBoardData}
     />
   );
 };

@@ -7,17 +7,17 @@ import { X, Sparkles } from "lucide-react";
 interface CreateTaskModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: { title: string; description: string; columnId: string }) => Promise<void>;
-  columnId: string;
-  columnTitle: string;
+  onSubmit: (data: { title: string; description: string; listId: string }) => Promise<void>;
+  listId: string;
+  listTitle: string;
 }
 
 export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   open,
   onClose,
   onSubmit,
-  columnId,
-  columnTitle,
+  listId,
+  listTitle,
 }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -29,7 +29,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
     setLoading(true);
     try {
-      await onSubmit({ title: title.trim(), description, columnId });
+      await onSubmit({ title: title.trim(), description, listId });
       setTitle("");
       setDescription("");
       onClose();
@@ -64,7 +64,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                   Create New Task
                 </Typography>
                 <Typography variant="body2" className="text-amber-600">
-                  in {columnTitle}
+                  in {listTitle}
                 </Typography>
               </Box>
             </Box>

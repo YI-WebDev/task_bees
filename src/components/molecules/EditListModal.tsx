@@ -2,62 +2,51 @@ import React, { useState } from "react";
 import { Dialog, DialogContent, Box, TextField } from "@mui/material";
 import { Button } from "../atoms/Button";
 import { Typography } from "../atoms/Typography";
-import { createColumn } from "../services/boardService";
+import { updateList } from "../services/boardService";
 import { Layout, X } from "lucide-react";
+import { List } from "../../types/types";
 
-interface CreateColumnModalProps {
+interface EditListModalProps {
   open: boolean;
   onClose: () => void;
-  onColumnCreated: () => void;
-  boardId: string;
+  onListUpdated: () => void;
+  list: List;
 }
 
-export const CreateColumnModal: React.FC<CreateColumnModalProps> = ({
+export const EditListModal: React.FC<EditListModalProps> = ({
   open,
   onClose,
-  onColumnCreated,
-  boardId,
+  onListUpdated,
+  list,
 }) => {
-  const [title, setTitle] = useState("");
-  const [color, setColor] = useState("#f59e0b");
+  const [title, setTitle] = useState(list.title);
+  const [color, setColor] = useState(list.color || "#f59e0b");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
-
     setLoading(true);
     setError(null);
 
     try {
-      await createColumn({
-        title: title.trim(),
+      await updateList(list.id, {
+        title,
         color,
-        board_id: boardId,
       });
-      setTitle("");
-      setColor("#f59e0b");
-      onColumnCreated();
+      onListUpdated();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create column");
+      setError(err instanceof Error ? err.message : "Failed to update list");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleClose = () => {
-    setTitle("");
-    setColor("#f59e0b");
-    setError(null);
-    onClose();
-  };
-
   return (
     <Dialog
       open={open}
-      onClose={handleClose}
+      onClose={onClose}
       maxWidth="sm"
       fullWidth
       PaperProps={{
@@ -74,12 +63,12 @@ export const CreateColumnModal: React.FC<CreateColumnModalProps> = ({
               <Box className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
                 <Layout className="w-4 h-4 text-amber-600" />
               </Box>
-              New Column
+              Edit List
             </Typography>
             <Box className="relative">
               <Button
                 variant="secondary"
-                onClick={handleClose}
+                onClick={onClose}
                 className="w-10 h-10 !p-0 rounded-full hover:bg-amber-100 text-amber-600 flex items-center justify-center"
                 icon={<X className="absolute inset-0 m-auto w-5 h-5" />}
               />
@@ -91,7 +80,7 @@ export const CreateColumnModal: React.FC<CreateColumnModalProps> = ({
                 variant="body2"
                 className="font-medium text-amber-700 flex items-center gap-1"
               >
-                Column name
+                List name
                 <span className="text-amber-500">*</span>
               </Typography>
               <TextField
@@ -120,7 +109,7 @@ export const CreateColumnModal: React.FC<CreateColumnModalProps> = ({
 
             <Box className="space-y-2.5">
               <Typography variant="body2" className="font-medium text-amber-700">
-                Column color
+                List color
               </Typography>
               <Box className="flex items-center gap-3">
                 <input
@@ -130,7 +119,7 @@ export const CreateColumnModal: React.FC<CreateColumnModalProps> = ({
                   className="w-12 h-12 rounded-lg cursor-pointer"
                 />
                 <Typography variant="body2" className="text-gray-600">
-                  Choose a color to help identify this column
+                  Choose a color to help identify this list
                 </Typography>
               </Box>
             </Box>
@@ -138,17 +127,17 @@ export const CreateColumnModal: React.FC<CreateColumnModalProps> = ({
           <Box className="flex justify-end gap-3 pt-2">
             <Button
               variant="secondary"
-              onClick={handleClose}
+              onClick={onClose}
               className="px-5 h-11 border-amber-200 text-amber-700 hover:bg-amber-50 rounded-xl"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              disabled={loading || !title.trim()}
+              disabled={loading}
               className="px-5 h-11 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-600 hover:to-amber-500 text-white rounded-xl shadow-sm"
             >
-              {loading ? "Creating..." : "Create Column"}
+              {loading ? "Saving..." : "Save Changes"}
             </Button>
           </Box>
         </DialogContent>

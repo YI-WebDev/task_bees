@@ -1,5 +1,5 @@
 import { supabase } from "../lib/supabase";
-import type { Board, Column, Task } from "../../types/types";
+import type { Board, List, Task } from "../../types/types";
 
 interface BoardWithCounts extends Board {
   total_tasks: number;
@@ -12,7 +12,7 @@ export async function getBoards() {
     .select(
       `
       *,
-      columns (
+      lists (
         id,
         tasks (
           id,
@@ -26,7 +26,7 @@ export async function getBoards() {
   if (boardsError) throw boardsError;
 
   const boardsWithCounts: BoardWithCounts[] = boardsData.map(board => {
-    const allTasks = board.columns?.flatMap((column: Column) => column.tasks) || [];
+    const allTasks = board.lists?.flatMap((list: List) => list.tasks) || [];
     const totalTasks = allTasks.length;
     const completedTasks = allTasks.filter((task: Task) => task.is_completed).length;
 
@@ -89,7 +89,7 @@ export async function createBoard({ name }: { name: string }) {
   return board;
 }
 
-export async function createColumn({
+export async function createList({
   title,
   color,
   board_id,
@@ -98,8 +98,8 @@ export async function createColumn({
   color: string;
   board_id: string;
 }) {
-  const { data: columns, error: positionError } = await supabase
-    .from("columns")
+  const { data: lists, error: positionError } = await supabase
+    .from("lists")
     .select("position")
     .eq("board_id", board_id)
     .order("position", { ascending: false })
@@ -107,10 +107,10 @@ export async function createColumn({
 
   if (positionError) throw positionError;
 
-  const nextPosition = columns && columns.length > 0 ? columns[0].position + 1 : 0;
+  const nextPosition = lists && lists.length > 0 ? lists[0].position + 1 : 0;
 
   const { data, error } = await supabase
-    .from("columns")
+    .from("lists")
     .insert([
       {
         title,
@@ -126,17 +126,17 @@ export async function createColumn({
   return data;
 }
 
-export async function updateColumn(
-  columnId: string,
+export async function updateList(
+  listId: string,
   updates: {
     title?: string;
     color?: string;
   }
 ) {
   const { data, error } = await supabase
-    .from("columns")
+    .from("lists")
     .update(updates)
-    .eq("id", columnId)
+    .eq("id", listId)
     .select()
     .single();
 
@@ -144,8 +144,8 @@ export async function updateColumn(
   return data;
 }
 
-export async function deleteColumn(columnId: string) {
-  const { error } = await supabase.from("columns").delete().eq("id", columnId);
+export async function deleteList(listId: string) {
+  const { error } = await supabase.from("lists").delete().eq("id", listId);
 
   if (error) throw error;
 }
@@ -168,9 +168,9 @@ export async function deleteBoard(boardId: string) {
   if (error) throw error;
 }
 
-export async function getColumns(boardId: string) {
+export async function getLists(boardId: string) {
   const { data, error } = await supabase
-    .from("columns")
+    .from("lists")
     .select("*")
     .eq("board_id", boardId)
     .order("position");
@@ -179,23 +179,23 @@ export async function getColumns(boardId: string) {
   return data;
 }
 
-export async function getTasks(columnId: string) {
+export async function getTasks(listId: string) {
   const { data, error } = await supabase
     .from("tasks")
     .select("*")
-    .eq("column_id", columnId)
+    .eq("list_id", listId)
     .order("position");
 
   if (error) throw error;
   return data;
 }
 
-export async function updateTaskPositions(columnId: string, taskIds: string[]) {
+export async function updateTaskPositions(listId: string, taskIds: string[]) {
   try {
     for (let i = 0; i < taskIds.length; i++) {
       const { error } = await supabase
         .from("tasks")
-        .update({ position: i, column_id: columnId })
+        .update({ position: i, list_id: listId })
         .eq("id", taskIds[i]);
 
       if (error) {
@@ -212,13 +212,13 @@ export async function updateTaskPositions(columnId: string, taskIds: string[]) {
 export async function createTask(taskData: {
   title: string;
   description: string;
-  column_id: string;
+  list_id: string;
   created_by: string;
 }) {
   const { data: tasks, error: positionError } = await supabase
     .from("tasks")
     .select("position")
-    .eq("column_id", taskData.column_id)
+    .eq("list_id", taskData.list_id)
     .order("position", { ascending: false })
     .limit(1);
 
@@ -251,14 +251,14 @@ export async function updateTask(
   updates: {
     title?: string;
     description?: string;
-    columnId?: string;
+    listId?: string;
     is_completed?: boolean;
   }
 ) {
   const dbUpdates = {
     title: updates.title,
     description: updates.description,
-    column_id: updates.columnId,
+    list_id: updates.listId,
     is_completed: updates.is_completed,
     updated_at: new Date().toISOString(),
   };

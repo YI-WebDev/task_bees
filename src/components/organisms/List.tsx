@@ -5,7 +5,7 @@ import { Typography } from "../atoms/Typography";
 import { TaskCard } from "../molecules/TaskCard";
 import { EditTaskModal } from "../molecules/EditTaskModal";
 import { deleteTask } from "../services/boardService";
-import { Column as ColumnType, Task } from "../../types/types";
+import { List as ListType, Task } from "../../types/types";
 import { IconButton } from "../atoms/IconButton";
 import { Menu } from "../atoms/Menu";
 import { MenuItem } from "../atoms/MenuItem";
@@ -14,30 +14,30 @@ import { DeleteConfirmationModal } from "../molecules/DeleteConfirmationModal";
 import { Button } from "../atoms/Button";
 import { CreateTaskModal } from "../molecules/CreateTaskModal";
 
-interface ColumnProps {
-  column: ColumnType;
+interface ListProps {
+  list: ListType;
   onDragStart: (
     e: React.DragEvent,
     taskId: string,
-    sourceColumnId: string,
+    sourceListId: string,
     currentIndex: number
   ) => void;
   onDragOver: (e: React.DragEvent) => void;
-  onDrop: (e: React.DragEvent, columnId: string, dropIndex: number) => void;
+  onDrop: (e: React.DragEvent, listId: string, dropIndex: number) => void;
   onTaskDeleted: () => void;
-  onEditColumn: () => void;
-  onDeleteColumn: () => void;
-  onCreateTask: (data: { title: string; description: string; columnId: string }) => Promise<void>;
+  onEditList: () => void;
+  onDeleteList: () => void;
+  onCreateTask: (data: { title: string; description: string; listId: string }) => Promise<void>;
 }
 
-export const Column: React.FC<ColumnProps> = ({
-  column,
+export const List: React.FC<ListProps> = ({
+  list,
   onDragStart,
   onDragOver,
   onDrop,
   onTaskDeleted,
-  onEditColumn,
-  onDeleteColumn,
+  onEditList,
+  onDeleteList,
   onCreateTask,
 }) => {
   const [dropTarget, setDropTarget] = useState<{
@@ -45,15 +45,15 @@ export const Column: React.FC<ColumnProps> = ({
     position: "top" | "bottom";
   } | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [tasks, setTasks] = useState<Task[]>(column.tasks);
+  const [tasks, setTasks] = useState<Task[]>(list.tasks);
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false);
 
   React.useEffect(() => {
-    setTasks(column.tasks);
-  }, [column.tasks]);
+    setTasks(list.tasks);
+  }, [list.tasks]);
 
   const handleDeleteTask = async (taskId: string) => {
     try {
@@ -64,16 +64,16 @@ export const Column: React.FC<ColumnProps> = ({
       onTaskDeleted();
     } catch (error) {
       console.error("Failed to delete task:", error);
-      setTasks(column.tasks);
+      setTasks(list.tasks);
     }
   };
 
-  const handleColumnDragOver = (e: React.DragEvent) => {
+  const handleListDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     onDragOver(e);
 
-    const columnRect = e.currentTarget.getBoundingClientRect();
-    const mouseY = e.clientY - columnRect.top;
+    const listRect = e.currentTarget.getBoundingClientRect();
+    const mouseY = e.clientY - listRect.top;
 
     if (tasks.length === 0) {
       setDropTarget(null);
@@ -87,7 +87,7 @@ export const Column: React.FC<ColumnProps> = ({
 
     Array.from(taskElements).forEach((taskElement, index) => {
       const rect = taskElement.getBoundingClientRect();
-      const taskTop = rect.top - columnRect.top;
+      const taskTop = rect.top - listRect.top;
       const taskBottom = taskTop + rect.height;
       const taskMiddle = taskTop + rect.height / 2;
 
@@ -115,10 +115,10 @@ export const Column: React.FC<ColumnProps> = ({
     setDropTarget({ index: closestIndex, position });
   };
 
-  const handleColumnDrop = (e: React.DragEvent) => {
+  const handleListDrop = (e: React.DragEvent) => {
     e.preventDefault();
     if (!dropTarget && tasks.length === 0) {
-      onDrop(e, column.id, 0);
+      onDrop(e, list.id, 0);
       return;
     }
 
@@ -126,7 +126,7 @@ export const Column: React.FC<ColumnProps> = ({
 
     const dropIndex =
       dropTarget.position === "bottom" ? dropTarget.index + 1 : dropTarget.index;
-    onDrop(e, column.id, dropIndex);
+    onDrop(e, list.id, dropIndex);
     setDropTarget(null);
   };
 
@@ -141,7 +141,7 @@ export const Column: React.FC<ColumnProps> = ({
 
   const handleEditClick = () => {
     handleMenuClose();
-    onEditColumn();
+    onEditList();
   };
 
   const handleDeleteClick = () => {
@@ -152,7 +152,7 @@ export const Column: React.FC<ColumnProps> = ({
   const handleDeleteConfirm = async () => {
     setDeleteLoading(true);
     try {
-      await onDeleteColumn();
+      await onDeleteList();
     } finally {
       setDeleteLoading(false);
       setShowDeleteConfirmation(false);
@@ -169,21 +169,21 @@ export const Column: React.FC<ColumnProps> = ({
           p: 2,
           display: "flex",
           flexDirection: "column",
-          borderTop: `4px solid ${column.color}`,
+          borderTop: `4px solid ${list.color}`,
           position: "relative",
         }}
-        onDragOver={handleColumnDragOver}
-        onDrop={handleColumnDrop}
+        onDragOver={handleListDragOver}
+        onDrop={handleListDrop}
         onDragLeave={() => setDropTarget(null)}
       >
         <Box className="flex items-center justify-between mb-4">
           <Box className="flex items-center gap-2">
-            <Typography variant="h6" className="font-semibold" style={{ color: column.color }}>
-              {column.title}
+            <Typography variant="h6" className="font-semibold" style={{ color: list.color }}>
+              {list.title}
             </Typography>
             <Box
               className="px-2 py-0.5 rounded text-xs font-medium"
-              sx={{ backgroundColor: `${column.color}20`, color: column.color }}
+              sx={{ backgroundColor: `${list.color}20`, color: list.color }}
             >
               {tasks.length}
             </Box>
@@ -213,7 +213,7 @@ export const Column: React.FC<ColumnProps> = ({
                         left: 0,
                         right: 0,
                         height: 2,
-                        backgroundColor: column.color,
+                        backgroundColor: list.color,
                         borderRadius: 1,
                       }
                     : undefined,
@@ -226,7 +226,7 @@ export const Column: React.FC<ColumnProps> = ({
                         left: 0,
                         right: 0,
                         height: 2,
-                        backgroundColor: column.color,
+                        backgroundColor: list.color,
                         borderRadius: 1,
                       }
                     : undefined,
@@ -234,7 +234,7 @@ export const Column: React.FC<ColumnProps> = ({
             >
               <TaskCard
                 task={task}
-                onDragStart={e => onDragStart(e, task.id, column.id, index)}
+                onDragStart={e => onDragStart(e, task.id, list.id, index)}
                 onEdit={() => setEditingTask(task)}
                 onDelete={() => handleDeleteTask(task.id)}
               />
@@ -266,7 +266,7 @@ export const Column: React.FC<ColumnProps> = ({
           }}
         >
           <Edit size={16} />
-          Edit Column
+          Edit List
         </MenuItem>
         <MenuItem
           onClick={handleDeleteClick}
@@ -278,7 +278,7 @@ export const Column: React.FC<ColumnProps> = ({
           }}
         >
           <Trash2 size={16} />
-          Delete Column
+          Delete List
         </MenuItem>
       </Menu>
 
@@ -295,17 +295,18 @@ export const Column: React.FC<ColumnProps> = ({
         open={showDeleteConfirmation}
         onClose={() => setShowDeleteConfirmation(false)}
         onConfirm={handleDeleteConfirm}
-        title="Delete Column"
-        message={`Are you sure you want to delete "${column.title}"? All tasks in this column will be permanently deleted. This action cannot be undone.`}
+        title="Delete List"
+        message={`Are you sure you want to delete "${list.title}"? All tasks in this list will be permanently deleted. This action cannot be undone.`}
         loading={deleteLoading}
+        type="column"
       />
 
       <CreateTaskModal
         open={isCreateTaskModalOpen}
         onClose={() => setIsCreateTaskModalOpen(false)}
         onSubmit={onCreateTask}
-        columnId={column.id}
-        columnTitle={column.title}
+        listId={list.id}
+        listTitle={list.title}
       />
     </>
   );
