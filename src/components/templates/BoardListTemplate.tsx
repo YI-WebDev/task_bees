@@ -136,10 +136,6 @@ export const BoardListTemplate: React.FC<BoardListTemplateProps> = ({
             >
               Create Your First Board
             </Button>
-
-            <Box className="absolute w-32 h-32 bg-amber-50 rounded-full -bottom-8 right-1/3 animate-pulse delay-700">
-              {" "}
-            </Box>
           </Box>
         )}
 
