@@ -50,20 +50,24 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
   const [loadingBoards, setLoadingBoards] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-  useEffect(() => {
-    const loadBoards = async () => {
-      try {
-        const boardsData = await getBoards();
-        setBoards(boardsData);
-      } catch (error) {
-        console.error("Failed to load boards:", error);
-      } finally {
-        setLoadingBoards(false);
-      }
-    };
+  const loadBoards = async () => {
+    try {
+      const boardsData = await getBoards();
+      setBoards(boardsData);
+    } catch (error) {
+      console.error("Failed to load boards:", error);
+    } finally {
+      setLoadingBoards(false);
+    }
+  };
 
+  useEffect(() => {
     loadBoards();
   }, []);
+
+    useEffect(() => {
+    loadBoards();
+  }, [lists]);
 
   const handleDeleteList = async (listId: string) => {
     try {
@@ -73,6 +77,10 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
       console.error("Failed to delete list:", error);
     }
   };
+
+  const handleCreateTask = async (data: { title: string; description: string; listId: string }) => {
+    await onCreateTask(data);
+    loadBoards();   };
 
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "warning.50", display: "flex" }}>
@@ -131,7 +139,7 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
                 onTaskDeleted={onTaskDeleted}
                 onEditList={() => setEditingList(list)}
                 onDeleteList={() => handleDeleteList(list.id)}
-                onCreateTask={onCreateTask}
+                onCreateTask={handleCreateTask}
               />
             ))}
 
@@ -151,7 +159,10 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
       <CreateListModal
         open={isCreateListModalOpen}
         onClose={() => setIsCreateListModalOpen(false)}
-        onListCreated={onListCreated}
+        onListCreated={() => {
+          onListCreated();
+          loadBoards();
+        }}
         boardId={boardId}
       />
 
@@ -159,7 +170,10 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
         <EditListModal
           open={!!editingList}
           onClose={() => setEditingList(null)}
-          onListUpdated={onListUpdated}
+          onListUpdated={() => {
+            onListUpdated();
+            loadBoards();
+          }}
           list={editingList}
         />
       )}
@@ -167,9 +181,7 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
       <CreateBoardModal
         open={isCreateBoardModalOpen}
         onClose={() => setIsCreateBoardModalOpen(false)}
-        onBoardCreated={() => {
-          getBoards().then(setBoards).catch(console.error);
-        }}
+        onBoardCreated={loadBoards}
       />
     </Box>
   );

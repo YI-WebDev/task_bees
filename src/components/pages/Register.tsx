@@ -3,12 +3,13 @@ import { Box, Container, TextField, Alert } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { Typography } from "../atoms/Typography";
 import { Button } from "../atoms/Button";
-import { supabase } from "../lib/supabase";
+import { signUp } from "../services/authService";
 import EmojiNatureIcon from "@mui/icons-material/EmojiNature";
 
 export const Register: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -19,12 +20,7 @@ export const Register: React.FC = () => {
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (error) throw error;
+      await signUp(email, password, username);
       navigate("/login", { state: { message: "Registration successful! Please log in." } });
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -66,7 +62,21 @@ export const Register: React.FC = () => {
           <Box className="space-y-4">
             <Box className="space-y-2">
               <Typography variant="body2" className="font-medium text-amber-700">
-                Email
+                Username<span className="text-amber-500">*</span>
+              </Typography>
+              <TextField
+                fullWidth
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                placeholder="buzzy_bee"
+                required
+                className="border-amber-200 focus:border-amber-400"
+              />
+            </Box>
+
+            <Box className="space-y-2">
+              <Typography variant="body2" className="font-medium text-amber-700">
+                Email<span className="text-amber-500">*</span>
               </Typography>
               <TextField
                 fullWidth
@@ -81,7 +91,7 @@ export const Register: React.FC = () => {
 
             <Box className="space-y-2">
               <Typography variant="body2" className="font-medium text-amber-700">
-                Password
+                Password<span className="text-amber-500">*</span>
               </Typography>
               <TextField
                 fullWidth

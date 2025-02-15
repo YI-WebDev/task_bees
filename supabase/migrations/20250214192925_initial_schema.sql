@@ -55,7 +55,7 @@ CREATE TABLE tasks (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   title text NOT NULL,
   description text,
-  column_id uuid REFERENCES lists ON DELETE CASCADE NOT NULL,
+  list_id uuid REFERENCES lists ON DELETE CASCADE NOT NULL,
   position integer NOT NULL DEFAULT 0,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now(),
@@ -65,7 +65,11 @@ CREATE TABLE tasks (
 
 CREATE TABLE profiles (
   id uuid PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
-  full_name text NOT NULL
+  username text NOT NULL,
+  email text NOT NULL,
+  full_name text,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
 );
 
 -- Enable Row Level Security
@@ -116,7 +120,7 @@ CREATE POLICY "Users can view and manage tasks in their lists"
       SELECT 1 FROM lists
       JOIN boards ON boards.id = lists.board_id
       JOIN workspaces ON workspaces.id = boards.workspace_id
-      WHERE lists.id = tasks.column_id
+      WHERE lists.id = tasks.list_id
       AND workspaces.owner_id = auth.uid()
     )
   );
@@ -131,7 +135,7 @@ CREATE POLICY "Users can manage their own profile"
 -- Create indexes for better performance
 CREATE INDEX idx_boards_workspace_id ON boards(workspace_id);
 CREATE INDEX idx_lists_board_id ON lists(board_id);
-CREATE INDEX idx_tasks_column_id ON tasks(column_id);
+CREATE INDEX idx_tasks_list_id ON tasks(list_id);
 CREATE INDEX idx_tasks_created_by ON tasks(created_by);
 CREATE INDEX idx_tasks_is_completed ON tasks(is_completed);
 
@@ -139,10 +143,21 @@ CREATE INDEX idx_tasks_is_completed ON tasks(is_completed);
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name)
+  INSERT INTO public.profiles (
+    id,
+    username,
+    email,
+    full_name,
+    created_at,
+    updated_at
+  )
   VALUES (
     new.id,
-    COALESCE(new.raw_user_meta_data->>'full_name', split_part(new.email, '@', 1))
+    COALESCE(new.raw_user_meta_data->>'username', split_part(new.email, '@', 1)),
+    new.email,
+    COALESCE(new.raw_user_meta_data->>'full_name', split_part(new.email, '@', 1)),
+    now(),
+    now()
   );
   RETURN new;
 END;
@@ -154,13 +169,27 @@ CREATE TRIGGER on_auth_user_created
 
 -- Create function for position management
 CREATE OR REPLACE FUNCTION update_task_positions(
-  p_column_id uuid,
+  p_list_id uuid,
   p_task_ids uuid[]
 ) RETURNS void AS $$
 BEGIN
   UPDATE tasks
   SET position = array_position(p_task_ids, id) - 1
-  WHERE column_id = p_column_id
+  WHERE list_id = p_list_id
   AND id = ANY(p_task_ids);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Create function to update user profile
+CREATE OR REPLACE FUNCTION update_profile_timestamp()
+RETURNS trigger AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_profiles_timestamp
+  BEFORE UPDATE ON profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION update_profile_timestamp();

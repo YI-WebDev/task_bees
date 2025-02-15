@@ -3,7 +3,7 @@ import { Box, Container, TextField, Alert } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { Typography } from "../atoms/Typography";
 import { Button } from "../atoms/Button";
-import { supabase } from "../lib/supabase";
+import { signIn } from "../services/authService";
 import EmojiNatureIcon from "@mui/icons-material/EmojiNature";
 
 export const Login: React.FC = () => {
@@ -19,12 +19,7 @@ export const Login: React.FC = () => {
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
+      await signIn(email, password);
       navigate("/boards");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");

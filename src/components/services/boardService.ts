@@ -6,6 +6,12 @@ interface BoardWithCounts extends Board {
   completed_tasks: number;
 }
 
+interface ProfileUpdateData {
+  username?: string;
+  email?: string;
+  updated_at: string;
+}
+
 export async function getBoards() {
   const { data: boardsData, error: boardsError } = await supabase
     .from("boards")
@@ -73,12 +79,23 @@ export async function createBoard({ name }: { name: string }) {
     workspace = existingWorkspaces;
   }
 
+  const { data: lastBoard, error: positionError } = await supabase
+    .from("boards")
+    .select("position")
+    .eq("workspace_id", workspace.id)
+    .order("position", { ascending: false })
+    .limit(1)
+    .single();
+
+  const nextPosition = lastBoard ? lastBoard.position + 1 : 0;
+
   const { data: board, error: boardError } = await supabase
     .from("boards")
     .insert([
       {
         name,
         workspace_id: workspace.id,
+        position: nextPosition,
       },
     ])
     .select()
@@ -151,9 +168,17 @@ export async function deleteList(listId: string) {
 }
 
 export async function updateBoard(boardId: string, updates: { name: string }) {
+  const { data: currentBoard, error: fetchError } = await supabase
+    .from("boards")
+    .select("*")
+    .eq("id", boardId)
+    .single();
+
+  if (fetchError) throw fetchError;
+
   const { data, error } = await supabase
     .from("boards")
-    .update(updates)
+    .update({ ...updates, position: currentBoard.position })
     .eq("id", boardId)
     .select()
     .single();
@@ -281,5 +306,38 @@ export async function updateTask(
 export async function deleteTask(taskId: string) {
   const { error } = await supabase.from("tasks").delete().eq("id", taskId);
 
+  if (error) throw error;
+}
+
+export async function updateProfile(userId: string, data: ProfileUpdateData) {
+  const { error: profileError } = await supabase
+    .from('profiles')
+    .update(data)
+    .eq('id', userId);
+
+  if (profileError) throw profileError;
+}
+
+export async function updateUserProfile(userId: string, username: string, email?: string) {
+  try {
+    const { error: updateError } = await supabase.auth.updateUser({
+      data: { username },
+      ...(email ? { email } : {})
+    });
+
+    if (updateError) throw updateError;
+
+    await updateProfile(userId, {
+      username,
+      ...(email ? { email } : {}),
+      updated_at: new Date().toISOString()
+    });
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function updateUserPassword(newPassword: string) {
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
   if (error) throw error;
 }

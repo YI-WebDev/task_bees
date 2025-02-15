@@ -64,11 +64,7 @@ export const Dashboard: React.FC = () => {
     }
   }, [user, loadBoardData]);
 
-  const handleCreateTask = async (data: {
-    title: string;
-    description: string;
-    listId: string;
-  }) => {
+  const handleCreateTask = async (data: { title: string; description: string; listId: string }) => {
     if (!user) return;
 
     try {

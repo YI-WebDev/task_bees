@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { AppBar, Toolbar, Box, Avatar } from "@mui/material";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Settings } from "lucide-react";
 import EmojiNatureIcon from "@mui/icons-material/EmojiNature";
 import { Typography } from "../atoms/Typography";
 import { IconButton } from "../atoms/IconButton";
@@ -35,6 +35,11 @@ export const Header: React.FC<HeaderProps> = ({ onCreateTask }) => {
     signOut();
   };
 
+  const handleSettingsClick = () => {
+    handleMenuClose();
+    navigate("/settings");
+  };
+
   return (
     <AppBar position="static" sx={{ backgroundColor: "warning.main" }}>
       <Toolbar sx={{ minHeight: 72 }}>
@@ -51,7 +56,7 @@ export const Header: React.FC<HeaderProps> = ({ onCreateTask }) => {
           onClick={handleLogoClick}
         >
           <EmojiNatureIcon sx={{ fontSize: 48, marginRight: 1.5 }} />
-          <Typography variant="h4" component="h1" className="font-bold">
+          <Typography variant="h4" component="h1" className="font-bold text-white">
             TaskBees
           </Typography>
         </Box>
@@ -71,7 +76,7 @@ export const Header: React.FC<HeaderProps> = ({ onCreateTask }) => {
                 fontSize: "1.25rem",
               }}
             >
-              {user.email[0].toUpperCase()}
+              {user.user_metadata.username[0].toUpperCase()}
             </Avatar>
           ) : (
             <User className="w-6 h-6 text-white" />
@@ -90,22 +95,32 @@ export const Header: React.FC<HeaderProps> = ({ onCreateTask }) => {
             vertical: "top",
             horizontal: "right",
           }}
+          PaperProps={{
+            className: "bg-white/95 backdrop-blur-sm border border-amber-100 shadow-lg rounded-xl overflow-hidden"
+          }}
         >
-          <Box className="px-4 py-2 border-b border-amber-100">
+          <Box className="px-4 py-3 border-b border-amber-100 bg-amber-50/50">
             <Typography variant="body2" className="text-amber-800 font-medium">
               {user?.email}
             </Typography>
+            {user?.user_metadata?.username && (
+              <Typography variant="caption" className="text-amber-600">
+                @{user.user_metadata.username}
+              </Typography>
+            )}
           </Box>
           <MenuItem
-            onClick={handleSignOut}
-            sx={{
-              color: "warning.dark",
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-            }}
+            onClick={handleSettingsClick}
+            className="px-4 py-3 text-amber-700 hover:bg-amber-50 flex items-center gap-2 transition-colors"
           >
-            <LogOut size={16} />
+            <Settings className="w-4 h-4" />
+            Settings
+          </MenuItem>
+          <MenuItem
+            onClick={handleSignOut}
+            className="px-4 py-3 text-amber-700 hover:bg-amber-50 flex items-center gap-2 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
             Sign Out
           </MenuItem>
         </Menu>

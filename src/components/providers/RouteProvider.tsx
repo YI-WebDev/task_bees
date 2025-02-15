@@ -5,6 +5,7 @@ import { Register } from "../pages/Register";
 import { CreateBoard } from "../pages/CreateBoard";
 import { Dashboard } from "../pages/Dashboard";
 import { BoardList } from "../pages/BoardList";
+import { Settings } from "../pages/Settings";
 import { RequireAuth } from "../contexts/AuthContext";
 
 export const RouteProvider: React.FC = () => {
@@ -12,6 +13,14 @@ export const RouteProvider: React.FC = () => {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route
+        path="/settings"
+        element={
+          <RequireAuth>
+            <Settings />
+          </RequireAuth>
+        }
+      />
       <Route
         path="/boards"
         element={
