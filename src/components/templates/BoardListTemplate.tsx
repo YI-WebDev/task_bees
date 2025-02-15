@@ -85,8 +85,7 @@ export const BoardListTemplate: React.FC<BoardListTemplateProps> = ({
                 },
               }}
               sx={{
-                "& .MuiOutlinedInput-root": {
-                },
+                "& .MuiOutlinedInput-root": {},
               }}
             />
             <Button onClick={onCreateBoard} icon={<Plus className="w-4 h-4" />}>
@@ -105,29 +104,31 @@ export const BoardListTemplate: React.FC<BoardListTemplateProps> = ({
 
         {boards.length === 0 && !searchQuery && (
           <Box className="flex flex-col items-center justify-center min-h-[60vh] relative">
-            <Box className="absolute w-24 h-24 bg-amber-100 rounded-full top-0 right-1/4 animate-pulse">{" "}</Box>
-            <Box className="absolute w-16 h-16 bg-amber-50 rounded-full bottom-1/4 left-1/4 animate-pulse delay-300">{" "}</Box>
-            
             <Box className="relative">
-              <EmojiNatureIcon 
-                sx={{ 
-                  fontSize: 120, 
+              <EmojiNatureIcon
+                sx={{
+                  fontSize: 120,
                   color: "#f59e0b",
-                  animation: "bounce 2s infinite"
-                }} 
+                  animation: "bounce 2s infinite",
+                }}
                 className="animate-bounce"
               />
-              <Box className="absolute -top-4 -right-4 w-8 h-8 bg-amber-200 rounded-full animate-ping">{" "}</Box>
-              <Box className="absolute -bottom-2 -left-2 w-6 h-6 bg-amber-300 rounded-full animate-ping delay-500">{" "}</Box>
+              <Box className="absolute -top-4 -right-4 w-8 h-8 bg-amber-200 rounded-full animate-ping">
+                {" "}
+              </Box>
+              <Box className="absolute -bottom-2 -left-2 w-6 h-6 bg-amber-300 rounded-full animate-ping delay-500">
+                {" "}
+              </Box>
             </Box>
 
             <Typography variant="h4" className="mt-8 font-bold text-amber-800 text-center">
               Welcome to Your Hive! 🐝
             </Typography>
             <Typography variant="body1" className="mt-4 text-amber-600 text-center max-w-md">
-              Start organizing your tasks by creating your first board. Let's make your workflow as sweet as honey!
+              Start organizing your tasks by creating your first board. Let's make your workflow as
+              sweet as honey!
             </Typography>
-            
+
             <Button
               onClick={onCreateBoard}
               icon={<Plus className="w-5 h-5" />}
@@ -136,7 +137,9 @@ export const BoardListTemplate: React.FC<BoardListTemplateProps> = ({
               Create Your First Board
             </Button>
 
-            <Box className="absolute w-32 h-32 bg-amber-50 rounded-full -bottom-8 right-1/3 animate-pulse delay-700">{" "}</Box>
+            <Box className="absolute w-32 h-32 bg-amber-50 rounded-full -bottom-8 right-1/3 animate-pulse delay-700">
+              {" "}
+            </Box>
           </Box>
         )}
 
