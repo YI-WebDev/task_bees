@@ -10,14 +10,14 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ fullScreen = fal
   if (fullScreen) {
     return (
       <Box className="min-h-screen bg-amber-50 flex items-center justify-center">
-        <CircularProgress color="warning" />
+        <CircularProgress color="primary" />
       </Box>
     );
   }
 
   return (
     <Box className="flex items-center justify-center p-4">
-      <CircularProgress color="warning" />
+      <CircularProgress color="primary" />
     </Box>
   );
 };

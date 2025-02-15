@@ -41,8 +41,20 @@ export const Header: React.FC<HeaderProps> = ({ onCreateTask }) => {
   };
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: "warning.main" }}>
-      <Toolbar sx={{ minHeight: 72 }}>
+    <AppBar 
+      position="fixed" 
+      sx={{ 
+        backgroundColor: "primary.main",
+        width: "100%",
+        zIndex: 1300
+      }}
+    >
+      <Toolbar 
+        sx={{ 
+          minHeight: 72,
+          px: { xs: 2, sm: 4, md: 6 }
+        }}
+      >
         <Box
           sx={{
             display: "flex",
@@ -55,7 +67,7 @@ export const Header: React.FC<HeaderProps> = ({ onCreateTask }) => {
           }}
           onClick={handleLogoClick}
         >
-          <EmojiNatureIcon sx={{ fontSize: 48, marginRight: 1.5 }} />
+          <EmojiNatureIcon sx={{ fontSize: 48, marginRight: 1.5, color: "white" }} />
           <Typography variant="h4" component="h1" className="font-bold text-white">
             TaskBees
           </Typography>
@@ -65,14 +77,14 @@ export const Header: React.FC<HeaderProps> = ({ onCreateTask }) => {
 
         <IconButton
           onClick={handleMenuOpen}
-          className="w-12 h-12 bg-amber-400/20 hover:bg-amber-400/30"
+          className="w-12 h-12 bg-primary-400/20 hover:bg-primary-400/30"
         >
           {user?.email ? (
             <Avatar
               sx={{
                 width: 40,
                 height: 40,
-                bgcolor: "warning.dark",
+                bgcolor: "primary.dark",
                 fontSize: "1.25rem",
               }}
             >
@@ -96,29 +108,29 @@ export const Header: React.FC<HeaderProps> = ({ onCreateTask }) => {
             horizontal: "right",
           }}
           PaperProps={{
-            className: "bg-white/95 backdrop-blur-sm border border-amber-100 shadow-lg rounded-xl overflow-hidden"
+            className: "bg-white/95 backdrop-blur-sm border border-primary-100 shadow-lg rounded-xl overflow-hidden"
           }}
         >
-          <Box className="px-4 py-3 border-b border-amber-100 bg-amber-50/50">
-            <Typography variant="body2" className="text-amber-800 font-medium">
+          <Box className="px-4 py-3 border-b border-primary-100 bg-primary-50/50">
+            <Typography variant="body2" className="text-primary-800 font-medium">
               {user?.email}
             </Typography>
             {user?.user_metadata?.username && (
-              <Typography variant="caption" className="text-amber-600">
+              <Typography variant="caption" className="text-primary-600">
                 @{user.user_metadata.username}
               </Typography>
             )}
           </Box>
           <MenuItem
             onClick={handleSettingsClick}
-            className="px-4 py-3 text-amber-700 hover:bg-amber-50 flex items-center gap-2 transition-colors"
+            className="px-4 py-3 text-primary-700 hover:bg-primary-50 flex items-center gap-2 transition-colors"
           >
             <Settings className="w-4 h-4" />
             Settings
           </MenuItem>
           <MenuItem
             onClick={handleSignOut}
-            className="px-4 py-3 text-amber-700 hover:bg-amber-50 flex items-center gap-2 transition-colors"
+            className="px-4 py-3 text-primary-700 hover:bg-primary-50 flex items-center gap-2 transition-colors"
           >
             <LogOut className="w-4 h-4" />
             Sign Out

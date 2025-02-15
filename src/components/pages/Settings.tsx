@@ -68,7 +68,7 @@ export const Settings: React.FC = () => {
   return (
     <Box className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100/50">
       <Header />
-      <Container maxWidth="md" className="py-8">
+      <Container maxWidth="md" className="pt-20">
         <Box className="flex items-center gap-3 mb-8">
           <Box className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
             <ShieldCheck className="w-6 h-6 text-amber-600" />

@@ -61,7 +61,7 @@ export const BoardListTemplate: React.FC<BoardListTemplateProps> = ({
   return (
     <Box className="min-h-screen bg-amber-50">
       <Header />
-      <Container maxWidth="xl" className="py-8">
+      <Container maxWidth="xl" className="pt-20">
         <Box className="flex justify-between items-center mb-8">
           <Typography variant="h4" className="font-bold text-amber-800">
             My Boards
@@ -188,7 +188,7 @@ export const BoardListTemplate: React.FC<BoardListTemplateProps> = ({
                   <MenuItem
                     onClick={() => onEditBoard(board)}
                     sx={{
-                      color: "warning.dark",
+                      color: "primary.dark",
                       display: "flex",
                       alignItems: "center",
                       gap: 1,

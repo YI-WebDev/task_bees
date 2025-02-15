@@ -31,10 +31,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const drawerStyles = {
     width: drawerWidth,
     boxSizing: "border-box" as const,
-    backgroundColor: "white",
     borderRight: "1px solid",
-    borderColor: "warning.light",
+    borderColor: "primary.light",
     overflowX: "hidden" as const,
+    marginTop: "72px",
   };
 
   return (
@@ -50,6 +50,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           display: { xs: "block", lg: "none" },
           "& .MuiDrawer-paper": {
             ...drawerStyles,
+            marginTop: 0,
+            height: "100%",
           },
         }}
       >
@@ -65,8 +67,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         sx={{
           display: { xs: "none", lg: "block" },
           position: "fixed",
-          height: "100%",
+          height: "calc(100% - 72px)",
+          top: "72px",
           zIndex: 1200,
+          backgroundColor: "primary.50",
         }}
       >
         <Drawer
@@ -77,6 +81,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             height: "100%",
             "& .MuiDrawer-paper": {
               ...drawerStyles,
+              marginTop: 0,
               position: "static",
               transition: "transform 0.2s, width 0.2s",
               width: open ? drawerWidth : collapsedWidth,
@@ -99,13 +104,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 height: "100%",
                 backgroundColor: "white",
                 borderRight: "1px solid",
-                borderColor: "warning.light",
+                borderColor: "primary.light",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 cursor: "pointer",
                 "&:hover": {
-                  backgroundColor: "warning.50",
+                  backgroundColor: "primary.50",
                 },
               }}
               onClick={onClose}
@@ -152,7 +157,7 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
         </Button>
         <IconButton
           onClick={onClose}
-          className="ml-2 text-amber-600 hover:bg-amber-50"
+          className="ml-2 text-amber-700 hover:text-amber-800 hover:bg-amber-100"
         >
           <ChevronLeft className="w-5 h-5" />
         </IconButton>
@@ -193,13 +198,13 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
                   className="rounded-lg"
                   sx={{
                     "&.Mui-selected": {
-                      backgroundColor: "warning.light",
+                      backgroundColor: "primary.light",
                       "&:hover": {
-                        backgroundColor: "warning.light",
+                        backgroundColor: "primary.light",
                       },
                     },
                     "&:hover": {
-                      backgroundColor: "warning.50",
+                      backgroundColor: "primary.50",
                     },
                   }}
                 >

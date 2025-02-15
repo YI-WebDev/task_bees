@@ -83,7 +83,7 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
     loadBoards();   };
 
   return (
-    <Box sx={{ minHeight: "100vh", backgroundColor: "warning.50", display: "flex" }}>
+    <Box sx={{ minHeight: "100vh", backgroundColor: "primary.50", display: "flex" }}>
       <Sidebar
         boards={boards}
         currentBoardId={boardId}
@@ -99,7 +99,8 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
           marginLeft: { lg: isSidebarOpen ? "280px" : "24px" }, 
           transition: "margin 0.2s",
           width: { lg: `calc(100% - ${isSidebarOpen ? "280px" : "24px"})` },
-          position: "relative"
+          position: "relative",
+          paddingTop: "72px",
         }}
       >
         <Header />

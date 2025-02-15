@@ -14,7 +14,7 @@ export const DropTarget: React.FC<DropTargetProps> = ({ onDragOver, onDragLeave,
       sx={{
         minHeight: 100,
         border: "2px dashed",
-        borderColor: "warning.light",
+        borderColor: "primary.light",
         borderRadius: 1,
         display: "flex",
         alignItems: "center",

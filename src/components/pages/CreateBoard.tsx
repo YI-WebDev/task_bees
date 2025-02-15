@@ -27,7 +27,7 @@ export const CreateBoard: React.FC = () => {
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", backgroundColor: "warning.50", pt: 8 }}>
+    <Box sx={{ minHeight: "100vh", backgroundColor: "primary.50", pt: 8 }}>
       <Container maxWidth="sm">
         <Box
           component="form"
