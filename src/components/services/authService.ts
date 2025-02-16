@@ -23,49 +23,42 @@ export async function signUp(email: string, password: string, username: string) 
     options: {
       data: {
         username,
-        full_name: username
-      }
-    }
+        full_name: username,
+      },
+    },
   });
 
   if (error) throw error;
   return data;
 }
 
-export async function signOut() {
+export const signOut = async () => {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
-}
+};
 
 export async function updateProfile(userId: string, data: ProfileUpdateData) {
-  const { error: profileError } = await supabase
-    .from('profiles')
-    .update(data)
-    .eq('id', userId);
+  const { error: profileError } = await supabase.from("profiles").update(data).eq("id", userId);
 
   if (profileError) throw profileError;
 }
 
 export async function updateUserProfile(userId: string, username: string, email?: string) {
-  try {
-    const { error: updateError } = await supabase.auth.updateUser({
-      data: { username },
-      ...(email ? { email } : {})
-    });
+  const { error: updateError } = await supabase.auth.updateUser({
+    data: { username },
+    ...(email ? { email } : {}),
+  });
 
-    if (updateError) throw updateError;
+  if (updateError) throw updateError;
 
-    await updateProfile(userId, {
-      username,
-      ...(email ? { email } : {}),
-      updated_at: new Date().toISOString()
-    });
-  } catch (error) {
-    throw error;
-  }
+  await updateProfile(userId, {
+    username,
+    ...(email ? { email } : {}),
+    updated_at: new Date().toISOString(),
+  });
 }
 
 export async function updateUserPassword(newPassword: string) {
   const { error } = await supabase.auth.updateUser({ password: newPassword });
   if (error) throw error;
-} 
+}

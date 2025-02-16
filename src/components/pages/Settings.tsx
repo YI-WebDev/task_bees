@@ -27,11 +27,7 @@ export const Settings: React.FC = () => {
     setSuccess(null);
 
     try {
-      await updateUserProfile(
-        user.id,
-        username,
-        email !== user.email ? email : undefined
-      );
+      await updateUserProfile(user.id, username, email !== user.email ? email : undefined);
 
       await refreshUser();
       setSuccess("Profile updated successfully! 🎉");
@@ -79,25 +75,22 @@ export const Settings: React.FC = () => {
         </Box>
 
         {error && (
-          <Alert 
-            severity="error" 
-            className="mb-6 border border-red-200 bg-red-50 rounded-xl"
-          >
+          <Alert severity="error" className="mb-6 border border-red-200 bg-red-50 rounded-xl">
             {error}
           </Alert>
         )}
 
         {success && (
-          <Alert 
-            severity="success"
-            className="mb-6 border border-green-200 bg-green-50 rounded-xl"
-          >
+          <Alert severity="success" className="mb-6 border border-green-200 bg-green-50 rounded-xl">
             {success}
           </Alert>
         )}
 
         <Box className="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-amber-100 p-6 mb-6">
-          <Typography variant="h6" className="text-amber-700 font-medium mb-6 flex items-center gap-2">
+          <Typography
+            variant="h6"
+            className="text-amber-700 font-medium mb-6 flex items-center gap-2"
+          >
             <User className="w-5 h-5" />
             Profile Information
           </Typography>
@@ -109,7 +102,7 @@ export const Settings: React.FC = () => {
                   label="Email Address"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   required
                   fullWidth
                   className="bg-white"
@@ -121,7 +114,7 @@ export const Settings: React.FC = () => {
                 <TextField
                   label="Username"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={e => setUsername(e.target.value)}
                   required
                   fullWidth
                   className="bg-white"
@@ -142,7 +135,10 @@ export const Settings: React.FC = () => {
         </Box>
 
         <Box className="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-amber-100 p-6">
-          <Typography variant="h6" className="text-amber-700 font-medium mb-6 flex items-center gap-2">
+          <Typography
+            variant="h6"
+            className="text-amber-700 font-medium mb-6 flex items-center gap-2"
+          >
             <KeyRound className="w-5 h-5" />
             Change Password
           </Typography>
@@ -154,7 +150,7 @@ export const Settings: React.FC = () => {
                   label="New Password"
                   type="password"
                   value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
+                  onChange={e => setNewPassword(e.target.value)}
                   required
                   fullWidth
                   className="bg-white"
@@ -167,7 +163,7 @@ export const Settings: React.FC = () => {
                   label="Confirm New Password"
                   type="password"
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={e => setConfirmPassword(e.target.value)}
                   required
                   fullWidth
                   className="bg-white"
@@ -189,4 +185,4 @@ export const Settings: React.FC = () => {
       </Container>
     </Box>
   );
-}; 
+};

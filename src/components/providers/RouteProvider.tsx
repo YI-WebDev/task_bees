@@ -2,7 +2,6 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Login } from "../pages/Login";
 import { Register } from "../pages/Register";
-import { CreateBoard } from "../pages/CreateBoard";
 import { Dashboard } from "../pages/Dashboard";
 import { BoardList } from "../pages/BoardList";
 import { Settings } from "../pages/Settings";
@@ -26,14 +25,6 @@ export const RouteProvider: React.FC = () => {
         element={
           <RequireAuth>
             <BoardList />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/create-board"
-        element={
-          <RequireAuth>
-            <CreateBoard />
           </RequireAuth>
         }
       />

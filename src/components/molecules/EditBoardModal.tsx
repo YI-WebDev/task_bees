@@ -89,19 +89,7 @@ export const EditBoardModal: React.FC<EditBoardModalProps> = ({
                 required
                 error={!!error}
                 helperText={error}
-                className="h-12"
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    backgroundColor: "rgba(251, 191, 36, 0.05)",
-                    borderColor: "rgb(251, 191, 36)",
-                    "&:hover": {
-                      borderColor: "rgb(251, 191, 36)",
-                    },
-                    "&.Mui-focused": {
-                      borderColor: "rgb(251, 191, 36)",
-                    },
-                  },
-                }}
+                className="h-12 [&_.MuiOutlinedInput-root]:bg-amber-50/50 [&_.MuiOutlinedInput-root]:border-amber-400 [&_.MuiOutlinedInput-root:hover]:border-amber-400 [&_.MuiOutlinedInput-root.Mui-focused]:border-amber-400"
               />
             </Box>
           </Box>
@@ -114,11 +102,7 @@ export const EditBoardModal: React.FC<EditBoardModalProps> = ({
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="px-5 h-11 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-600 hover:to-amber-500 text-white rounded-xl shadow-sm"
-            >
+            <Button type="submit" disabled={loading} className="px-5 h-11">
               {loading ? "Saving..." : "Save Changes"}
             </Button>
           </Box>

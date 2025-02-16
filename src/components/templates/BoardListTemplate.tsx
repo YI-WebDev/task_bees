@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Grid, TextField, InputAdornment } from "@mui/material";
 import { Search, Edit, Trash2, MoreVertical, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +14,9 @@ import { LoadingSpinner } from "../molecules/feedback/LoadingSpinner";
 import { ErrorMessage } from "../molecules/feedback/ErrorMessage";
 import { EmptyState } from "../molecules/data-display/EmptyState";
 import { Header } from "../organisms/Header";
+import { CreateBoardModal } from "../molecules/CreateBoardModal";
+import { EditBoardModal } from "../molecules/EditBoardModal";
+import { DeleteConfirmationModal } from "../molecules/DeleteConfirmationModal";
 import EmojiNatureIcon from "@mui/icons-material/EmojiNature";
 import type { Board } from "../../types/types";
 
@@ -21,30 +24,54 @@ interface BoardListTemplateProps {
   boards: Board[];
   loading: boolean;
   error: string | null;
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-  onCreateBoard: () => void;
-  onEditBoard: (board: Board) => void;
-  onDeleteBoard: (board: Board) => void;
-  menuAnchorEl: { [key: string]: HTMLElement | null };
-  onMenuOpen: (event: React.MouseEvent<HTMLElement>, boardId: string) => void;
-  onMenuClose: (boardId: string) => void;
+  deleteLoading: boolean;
+  onBoardCreated: () => Promise<void>;
+  onBoardUpdated: () => Promise<void>;
+  onDeleteBoard: (boardId: string) => Promise<void>;
+  getDeleteMessage: (board: Board | null) => string;
 }
 
 export const BoardListTemplate: React.FC<BoardListTemplateProps> = ({
   boards,
   loading,
   error,
-  searchQuery,
-  onSearchChange,
-  onCreateBoard,
-  onEditBoard,
+  deleteLoading,
+  onBoardCreated,
+  onBoardUpdated,
   onDeleteBoard,
-  menuAnchorEl,
-  onMenuOpen,
-  onMenuClose,
+  getDeleteMessage,
 }) => {
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isCreateBoardModalOpen, setIsCreateBoardModalOpen] = useState(false);
+  const [editBoardData, setEditBoardData] = useState<{ id: string; name: string } | null>(null);
+  const [menuAnchorEl, setMenuAnchorEl] = useState<{ [key: string]: HTMLElement | null }>({});
+  const [deletingBoard, setDeletingBoard] = useState<Board | null>(null);
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, boardId: string) => {
+    event.stopPropagation();
+    setMenuAnchorEl({ ...menuAnchorEl, [boardId]: event.currentTarget });
+  };
+
+  const handleMenuClose = (boardId: string) => {
+    setMenuAnchorEl({ ...menuAnchorEl, [boardId]: null });
+  };
+
+  const handleEditBoard = (board: Board) => {
+    setEditBoardData({ id: board.id, name: board.name });
+    handleMenuClose(board.id);
+  };
+
+  const handleDeleteClick = (board: Board) => {
+    setDeletingBoard(board);
+    handleMenuClose(board.id);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingBoard) return;
+    await onDeleteBoard(deletingBoard.id);
+    setDeletingBoard(null);
+  };
 
   if (loading) {
     return <LoadingSpinner fullScreen />;
@@ -69,7 +96,7 @@ export const BoardListTemplate: React.FC<BoardListTemplateProps> = ({
           <Box className="flex items-center gap-4">
             <TextField
               value={searchQuery}
-              onChange={e => onSearchChange(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search boards..."
               className="w-64"
               InputProps={{
@@ -88,7 +115,10 @@ export const BoardListTemplate: React.FC<BoardListTemplateProps> = ({
                 "& .MuiOutlinedInput-root": {},
               }}
             />
-            <Button onClick={onCreateBoard} icon={<Plus className="w-4 h-4" />}>
+            <Button
+              onClick={() => setIsCreateBoardModalOpen(true)}
+              icon={<Plus className="w-4 h-4" />}
+            >
               Create Board
             </Button>
           </Box>
@@ -130,7 +160,7 @@ export const BoardListTemplate: React.FC<BoardListTemplateProps> = ({
             </Typography>
 
             <Button
-              onClick={onCreateBoard}
+              onClick={() => setIsCreateBoardModalOpen(true)}
               icon={<Plus className="w-5 h-5" />}
               className="mt-8 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-600 hover:to-amber-500 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transform transition-all hover:scale-105"
             >
@@ -160,7 +190,7 @@ export const BoardListTemplate: React.FC<BoardListTemplateProps> = ({
                       </Typography>
                     </Box>
                     <IconButton
-                      onClick={e => onMenuOpen(e, board.id)}
+                      onClick={e => handleMenuOpen(e, board.id)}
                       className="text-amber-400 hover:text-amber-600"
                     >
                       <MoreVertical className="w-4 h-4" />
@@ -182,11 +212,11 @@ export const BoardListTemplate: React.FC<BoardListTemplateProps> = ({
                 <Menu
                   anchorEl={menuAnchorEl[board.id]}
                   open={Boolean(menuAnchorEl[board.id])}
-                  onClose={() => onMenuClose(board.id)}
+                  onClose={() => handleMenuClose(board.id)}
                   onClick={e => e.stopPropagation()}
                 >
                   <MenuItem
-                    onClick={() => onEditBoard(board)}
+                    onClick={() => handleEditBoard(board)}
                     sx={{
                       color: "primary.dark",
                       display: "flex",
@@ -198,7 +228,7 @@ export const BoardListTemplate: React.FC<BoardListTemplateProps> = ({
                     Edit
                   </MenuItem>
                   <MenuItem
-                    onClick={() => onDeleteBoard(board)}
+                    onClick={() => handleDeleteClick(board)}
                     sx={{
                       color: "error.main",
                       display: "flex",
@@ -215,6 +245,29 @@ export const BoardListTemplate: React.FC<BoardListTemplateProps> = ({
           ))}
         </Grid>
       </Container>
+      <CreateBoardModal
+        open={isCreateBoardModalOpen}
+        onClose={() => setIsCreateBoardModalOpen(false)}
+        onBoardCreated={onBoardCreated}
+      />
+      {editBoardData && (
+        <EditBoardModal
+          open={!!editBoardData}
+          onClose={() => setEditBoardData(null)}
+          boardId={editBoardData.id}
+          currentName={editBoardData.name}
+          onBoardUpdated={onBoardUpdated}
+        />
+      )}
+      <DeleteConfirmationModal
+        open={!!deletingBoard}
+        onClose={() => setDeletingBoard(null)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Board"
+        message={getDeleteMessage(deletingBoard)}
+        loading={deleteLoading}
+        type="board"
+      />
     </Box>
   );
 };

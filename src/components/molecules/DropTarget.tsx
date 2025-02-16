@@ -11,20 +11,12 @@ interface DropTargetProps {
 export const DropTarget: React.FC<DropTargetProps> = ({ onDragOver, onDragLeave, onDrop }) => {
   return (
     <Box
-      sx={{
-        minHeight: 100,
-        border: "2px dashed",
-        borderColor: "primary.light",
-        borderRadius: 1,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
+      className="min-h-[100px] border-2 border-dashed border-amber-400 rounded flex items-center justify-center"
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
     >
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="body2" className="text-gray-500">
         Drop tasks here
       </Typography>
     </Box>

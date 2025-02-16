@@ -77,7 +77,10 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
           </Box>
           <Box className="space-y-5">
             <Box className="space-y-2.5">
-              <Typography variant="body2" className="font-medium text-amber-700 flex items-center gap-1">
+              <Typography
+                variant="body2"
+                className="font-medium text-amber-700 flex items-center gap-1"
+              >
                 Title
                 <span className="text-amber-500">*</span>
               </Typography>
@@ -87,19 +90,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 onChange={e => setTitle(e.target.value)}
                 placeholder="What needs to bee done? 🐝"
                 required
-                className="h-12"
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    backgroundColor: "rgba(251, 191, 36, 0.05)",
-                    borderColor: "rgb(251, 191, 36)",
-                    "&:hover": {
-                      borderColor: "rgb(251, 191, 36)",
-                    },
-                    "&.Mui-focused": {
-                      borderColor: "rgb(251, 191, 36)",
-                    },
-                  },
-                }}
+                className="h-12 [&_.MuiOutlinedInput-root]:bg-amber-50/50 [&_.MuiOutlinedInput-root]:border-amber-400 [&_.MuiOutlinedInput-root:hover]:border-amber-400 [&_.MuiOutlinedInput-root.Mui-focused]:border-amber-400"
               />
             </Box>
             <Box className="space-y-2.5">
@@ -113,18 +104,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 placeholder="Add the details of your task here..."
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    backgroundColor: "rgba(251, 191, 36, 0.05)",
-                    borderColor: "rgb(251, 191, 36)",
-                    "&:hover": {
-                      borderColor: "rgb(251, 191, 36)",
-                    },
-                    "&.Mui-focused": {
-                      borderColor: "rgb(251, 191, 36)",
-                    },
-                  },
-                }}
+                className="[&_.MuiOutlinedInput-root]:bg-amber-50/50 [&_.MuiOutlinedInput-root]:border-amber-400 [&_.MuiOutlinedInput-root:hover]:border-amber-400 [&_.MuiOutlinedInput-root.Mui-focused]:border-amber-400"
               />
               <Typography variant="caption" className="text-amber-600 italic">
                 Tip: Add all the important details to help track your progress 🍯
@@ -142,7 +122,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             <Button
               type="submit"
               disabled={loading || !title.trim()}
-              className="px-5 h-11 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-600 hover:to-amber-500 text-white rounded-xl shadow-sm flex items-center gap-2"
+              className="px-5 h-11"
               icon={<Sparkles className="w-4 h-4" />}
             >
               {loading ? "Creating..." : "Create Task"}

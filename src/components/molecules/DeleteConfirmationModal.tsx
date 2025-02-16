@@ -17,7 +17,6 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
   open,
   onClose,
   onConfirm,
-  title,
   message,
   loading = false,
   type = "task",

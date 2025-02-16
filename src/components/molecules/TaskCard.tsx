@@ -60,18 +60,15 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onDragStart, onEdit, o
         onDragStart={onDragStart}
         className="cursor-move hover:shadow-lg transition-shadow duration-200 border border-amber-100"
       >
-        <Box sx={{ p: 2 }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <Box className="p-2">
+          <Box className="flex justify-between items-start">
             <Typography variant="h6" className="mb-2">
               {task.title}
             </Typography>
             <IconButton
               onClick={handleClick}
               size="small"
-              sx={{
-                color: "primary.main",
-                "&:hover": { backgroundColor: "primary.light" },
-              }}
+              className="text-amber-500 hover:bg-amber-100"
             >
               <MoreVertical size={16} />
             </IconButton>
@@ -79,8 +76,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onDragStart, onEdit, o
           <Typography variant="body2" className="mb-2 text-gray-600">
             {task.description}
           </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", color: "primary.main" }}>
-            <Clock size={12} style={{ marginRight: 4 }} />
+          <Box className="flex items-center text-amber-500">
+            <Clock size={12} className="mr-1" />
             <Typography variant="caption">
               {new Date(task.created_at).toLocaleDateString()}
             </Typography>
@@ -92,12 +89,28 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onDragStart, onEdit, o
           onClose={handleClose}
           onClick={e => e.stopPropagation()}
         >
-          <MenuItem onClick={handleEdit} sx={{ color: "primary.dark" }}>
-            <Edit size={16} style={{ marginRight: 8 }} />
+          <MenuItem
+            onClick={handleEdit}
+            sx={{
+              color: "primary.dark",
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            <Edit size={16} className="mr-2" />
             Edit
           </MenuItem>
-          <MenuItem onClick={handleDeleteClick} sx={{ color: "error.main" }}>
-            <Trash2 size={16} style={{ marginRight: 8 }} />
+          <MenuItem
+            onClick={handleDeleteClick}
+            sx={{
+              color: "error.main",
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            <Trash2 size={16} className="mr-2" />
             Delete
           </MenuItem>
         </Menu>
