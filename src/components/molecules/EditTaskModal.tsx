@@ -88,19 +88,7 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({
                 required
                 error={!!error}
                 helperText={error}
-                className="h-12"
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    backgroundColor: "rgba(251, 191, 36, 0.05)",
-                    borderColor: "rgb(251, 191, 36)",
-                    "&:hover": {
-                      borderColor: "rgb(251, 191, 36)",
-                    },
-                    "&.Mui-focused": {
-                      borderColor: "rgb(251, 191, 36)",
-                    },
-                  },
-                }}
+                className="h-12 [&_.MuiOutlinedInput-root]:bg-amber-50/50 [&_.MuiOutlinedInput-root]:border-amber-400 [&_.MuiOutlinedInput-root:hover]:border-amber-400 [&_.MuiOutlinedInput-root.Mui-focused]:border-amber-400"
               />
             </Box>
             <Box className="space-y-2.5">
@@ -114,18 +102,7 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 placeholder="Add more details about this task..."
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    backgroundColor: "rgba(251, 191, 36, 0.05)",
-                    borderColor: "rgb(251, 191, 36)",
-                    "&:hover": {
-                      borderColor: "rgb(251, 191, 36)",
-                    },
-                    "&.Mui-focused": {
-                      borderColor: "rgb(251, 191, 36)",
-                    },
-                  },
-                }}
+                className="[&_.MuiOutlinedInput-root]:bg-amber-50/50 [&_.MuiOutlinedInput-root]:border-amber-400 [&_.MuiOutlinedInput-root:hover]:border-amber-400 [&_.MuiOutlinedInput-root.Mui-focused]:border-amber-400"
               />
             </Box>
           </Box>

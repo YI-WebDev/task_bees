@@ -1,17 +1,8 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-
-interface AuthContextType {
-  session: Session | null;
-  user: User | null;
-  signOut: () => Promise<void>;
-  loading: boolean;
-  refreshUser: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import { AuthContext, AuthContextType, useAuth } from "./auth";
 
 function AuthProviderComponent({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -45,11 +36,13 @@ function AuthProviderComponent({ children }: { children: React.ReactNode }) {
   };
 
   const refreshUser = async () => {
-    const { data: { user: refreshedUser } } = await supabase.auth.getUser();
+    const {
+      data: { user: refreshedUser },
+    } = await supabase.auth.getUser();
     setUser(refreshedUser);
   };
 
-  const value = {
+  const value: AuthContextType = {
     session,
     user,
     signOut,
@@ -62,14 +55,6 @@ function AuthProviderComponent({ children }: { children: React.ReactNode }) {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   return <AuthProviderComponent>{children}</AuthProviderComponent>;
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
 }
 
 export function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -86,3 +71,5 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
+
+export { useAuth } from "./auth";

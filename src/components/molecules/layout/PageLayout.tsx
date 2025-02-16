@@ -8,7 +8,11 @@ interface PageLayoutProps {
   className?: string;
 }
 
-export const PageLayout: React.FC<PageLayoutProps> = ({ children, onCreateTask, className = "" }) => {
+export const PageLayout: React.FC<PageLayoutProps> = ({
+  children,
+  onCreateTask,
+  className = "",
+}) => {
   return (
     <Box className={`min-h-screen bg-amber-50 ${className}`}>
       <Header onCreateTask={onCreateTask} />

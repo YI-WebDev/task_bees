@@ -79,7 +79,7 @@ export async function createBoard({ name }: { name: string }) {
     workspace = existingWorkspaces;
   }
 
-  const { data: lastBoard, error: positionError } = await supabase
+  const { data: lastBoard } = await supabase
     .from("boards")
     .select("position")
     .eq("workspace_id", workspace.id)
@@ -215,24 +215,20 @@ export async function getTasks(listId: string) {
   return data;
 }
 
-export async function updateTaskPositions(listId: string, taskIds: string[]) {
+export const updateTaskPositions = async (listId: string, taskIds: string[]) => {
   try {
-    for (let i = 0; i < taskIds.length; i++) {
-      const { error } = await supabase
-        .from("tasks")
-        .update({ position: i, list_id: listId })
-        .eq("id", taskIds[i]);
+    const updates = taskIds.map((taskId, index) => ({
+      id: taskId,
+      position: index,
+    }));
 
-      if (error) {
-        console.error("Error updating task position:", error);
-        throw error;
-      }
-    }
-  } catch (err) {
-    console.error("Error in updateTaskPositions:", err);
-    throw err;
+    const { error } = await supabase.from("tasks").upsert(updates, { onConflict: "id" });
+
+    if (error) throw error;
+  } catch (error) {
+    console.error("Error updating task positions:", error);
   }
-}
+};
 
 export async function createTask(taskData: {
   title: string;
@@ -303,38 +299,30 @@ export async function updateTask(
   return data;
 }
 
-export async function deleteTask(taskId: string) {
+export const deleteTask = async (taskId: string) => {
   const { error } = await supabase.from("tasks").delete().eq("id", taskId);
-
   if (error) throw error;
-}
+};
 
 export async function updateProfile(userId: string, data: ProfileUpdateData) {
-  const { error: profileError } = await supabase
-    .from('profiles')
-    .update(data)
-    .eq('id', userId);
+  const { error: profileError } = await supabase.from("profiles").update(data).eq("id", userId);
 
   if (profileError) throw profileError;
 }
 
 export async function updateUserProfile(userId: string, username: string, email?: string) {
-  try {
-    const { error: updateError } = await supabase.auth.updateUser({
-      data: { username },
-      ...(email ? { email } : {})
-    });
+  const { error: updateError } = await supabase.auth.updateUser({
+    data: { username },
+    ...(email ? { email } : {}),
+  });
 
-    if (updateError) throw updateError;
+  if (updateError) throw updateError;
 
-    await updateProfile(userId, {
-      username,
-      ...(email ? { email } : {}),
-      updated_at: new Date().toISOString()
-    });
-  } catch (error) {
-    throw error;
-  }
+  await updateProfile(userId, {
+    username,
+    ...(email ? { email } : {}),
+    updated_at: new Date().toISOString(),
+  });
 }
 
 export async function updateUserPassword(newPassword: string) {

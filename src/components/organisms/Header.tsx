@@ -9,11 +9,7 @@ import { MenuItem } from "../atoms/MenuItem";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-export interface HeaderProps {
-  onCreateTask?: () => void;
-}
-
-export const Header: React.FC<HeaderProps> = ({ onCreateTask }) => {
+export const Header: React.FC = () => {
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -41,18 +37,18 @@ export const Header: React.FC<HeaderProps> = ({ onCreateTask }) => {
   };
 
   return (
-    <AppBar 
-      position="fixed" 
-      sx={{ 
+    <AppBar
+      position="fixed"
+      sx={{
         backgroundColor: "primary.main",
         width: "100%",
-        zIndex: 1300
+        zIndex: 1300,
       }}
     >
-      <Toolbar 
-        sx={{ 
+      <Toolbar
+        sx={{
           minHeight: 72,
-          px: { xs: 2, sm: 4, md: 6 }
+          px: { xs: 2, sm: 4, md: 6 },
         }}
       >
         <Box
@@ -108,7 +104,8 @@ export const Header: React.FC<HeaderProps> = ({ onCreateTask }) => {
             horizontal: "right",
           }}
           PaperProps={{
-            className: "bg-white/95 backdrop-blur-sm border border-primary-100 shadow-lg rounded-xl overflow-hidden"
+            className:
+              "bg-white/95 backdrop-blur-sm border border-primary-100 shadow-lg rounded-xl overflow-hidden",
           }}
         >
           <Box className="px-4 py-3 border-b border-primary-100 bg-primary-50/50">

@@ -1,8 +1,15 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { DashboardTemplate } from "../templates/DashboardTemplate";
-import { List } from "../../types/types";
-import { getLists, getTasks, updateTaskPositions, createTask } from "../services/boardService";
+import { List, Board } from "../../types/types";
+import {
+  getLists,
+  getTasks,
+  updateTaskPositions,
+  createTask,
+  deleteList,
+  getBoards,
+} from "../services/boardService";
 import { useAuth } from "../contexts/AuthContext";
 import { LoadingSpinner } from "../molecules/feedback/LoadingSpinner";
 import { ErrorMessage } from "../molecules/feedback/ErrorMessage";
@@ -11,15 +18,30 @@ import { checkSupabaseConnection, handleSupabaseError } from "../lib/supabase";
 export const Dashboard: React.FC = () => {
   const { boardId } = useParams();
   const [lists, setLists] = useState<List[]>([]);
+  const [boards, setBoards] = useState<Board[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingBoards, setLoadingBoards] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const [draggedTask, setDraggedTask] = useState<{
     taskId: string;
     sourceColumnId: string;
     currentIndex: number;
   } | null>(null);
+
+  const loadBoards = async () => {
+    try {
+      const boardsData = await getBoards();
+      setBoards(boardsData);
+    } catch (error) {
+      console.error("Failed to load boards:", error);
+      setError(handleSupabaseError(error));
+    } finally {
+      setLoadingBoards(false);
+    }
+  };
 
   const loadBoardData = useCallback(async () => {
     try {
@@ -61,6 +83,7 @@ export const Dashboard: React.FC = () => {
   useEffect(() => {
     if (user) {
       loadBoardData();
+      loadBoards();
     }
   }, [user, loadBoardData]);
 
@@ -94,9 +117,22 @@ export const Dashboard: React.FC = () => {
           return list;
         });
       });
+
+      await loadBoards();
     } catch (error) {
       console.error("Failed to create task:", error);
       throw error;
+    }
+  };
+
+  const handleDeleteList = async (listId: string) => {
+    try {
+      await deleteList(listId);
+      await loadBoardData();
+      await loadBoards();
+    } catch (error) {
+      console.error("Failed to delete list:", error);
+      setError(handleSupabaseError(error));
     }
   };
 
@@ -154,9 +190,11 @@ export const Dashboard: React.FC = () => {
 
         return newLists;
       });
+
+      await loadBoards();
     } catch (err) {
       console.error("Error updating task positions:", err);
-      setError("Failed to update task positions");
+      setError(handleSupabaseError(err));
     }
 
     setDraggedTask(null);
@@ -174,14 +212,19 @@ export const Dashboard: React.FC = () => {
     <DashboardTemplate
       boardId={boardId!}
       lists={lists}
+      boards={boards}
+      loadingBoards={loadingBoards}
+      isSidebarOpen={isSidebarOpen}
+      onSidebarOpenChange={setIsSidebarOpen}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       onCreateTask={handleCreateTask}
-      onTaskDeleted={loadBoardData}
+      onDeleteList={handleDeleteList}
+      onBoardCreated={loadBoards}
       onListCreated={loadBoardData}
       onListUpdated={loadBoardData}
-      onListDeleted={loadBoardData}
+      onTaskDeleted={loadBoardData}
     />
   );
 };

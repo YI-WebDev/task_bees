@@ -124,8 +124,7 @@ export const List: React.FC<ListProps> = ({
 
     if (!dropTarget) return;
 
-    const dropIndex =
-      dropTarget.position === "bottom" ? dropTarget.index + 1 : dropTarget.index;
+    const dropIndex = dropTarget.position === "bottom" ? dropTarget.index + 1 : dropTarget.index;
     onDrop(e, list.id, dropIndex);
     setDropTarget(null);
   };
@@ -251,11 +250,7 @@ export const List: React.FC<ListProps> = ({
         </Button>
       </Paper>
 
-      <Menu
-        anchorEl={menuAnchorEl}
-        open={Boolean(menuAnchorEl)}
-        onClose={handleMenuClose}
-      >
+      <Menu anchorEl={menuAnchorEl} open={Boolean(menuAnchorEl)} onClose={handleMenuClose}>
         <MenuItem
           onClick={handleEditClick}
           sx={{

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Box } from "../atoms/Box";
 import { Container } from "@mui/material";
 import { Header } from "../organisms/Header";
@@ -8,7 +8,6 @@ import { Button } from "../atoms/Button";
 import { Plus } from "lucide-react";
 import { CreateListModal } from "../molecules/CreateListModal";
 import { EditListModal } from "../molecules/EditListModal";
-import { deleteList, getBoards } from "../services/boardService";
 import { EmptyState } from "../molecules/data-display/EmptyState";
 import { Sidebar } from "../molecules/navigation/Sidebar";
 import { CreateBoardModal } from "../molecules/CreateBoardModal";
@@ -16,6 +15,10 @@ import { CreateBoardModal } from "../molecules/CreateBoardModal";
 interface DashboardTemplateProps {
   boardId: string;
   lists: ListType[];
+  boards: Board[];
+  loadingBoards: boolean;
+  isSidebarOpen: boolean;
+  onSidebarOpenChange: (isOpen: boolean) => void;
   onDragStart: (
     e: React.DragEvent,
     taskId: string,
@@ -25,62 +28,33 @@ interface DashboardTemplateProps {
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent, listId: string, dropIndex: number) => void;
   onCreateTask: (data: { title: string; description: string; listId: string }) => Promise<void>;
-  onTaskDeleted: () => void;
-  onListCreated: () => void;
-  onListUpdated: () => void;
-  onListDeleted: () => void;
+  onDeleteList: (listId: string) => Promise<void>;
+  onBoardCreated: () => Promise<void>;
+  onListCreated: () => Promise<void>;
+  onListUpdated: () => Promise<void>;
+  onTaskDeleted: () => Promise<void>;
 }
 
 export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
   boardId,
   lists,
+  boards,
+  loadingBoards,
+  isSidebarOpen,
+  onSidebarOpenChange,
   onDragStart,
   onDragOver,
   onDrop,
   onCreateTask,
-  onTaskDeleted,
+  onDeleteList,
+  onBoardCreated,
   onListCreated,
   onListUpdated,
-  onListDeleted,
+  onTaskDeleted,
 }) => {
   const [isCreateListModalOpen, setIsCreateListModalOpen] = useState(false);
   const [isCreateBoardModalOpen, setIsCreateBoardModalOpen] = useState(false);
   const [editingList, setEditingList] = useState<ListType | null>(null);
-  const [boards, setBoards] = useState<Board[]>([]);
-  const [loadingBoards, setLoadingBoards] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
-  const loadBoards = async () => {
-    try {
-      const boardsData = await getBoards();
-      setBoards(boardsData);
-    } catch (error) {
-      console.error("Failed to load boards:", error);
-    } finally {
-      setLoadingBoards(false);
-    }
-  };
-
-  useEffect(() => {
-    loadBoards();
-  }, []);
-
-    useEffect(() => {
-    loadBoards();
-  }, [lists]);
-
-  const handleDeleteList = async (listId: string) => {
-    try {
-      await deleteList(listId);
-      onListDeleted();
-    } catch (error) {
-      console.error("Failed to delete list:", error);
-    }
-  };
-
-  const handleCreateTask = async (data: { title: string; description: string; listId: string }) => {
-    await onCreateTask(data);
-    loadBoards();   };
 
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "primary.50", display: "flex" }}>
@@ -90,13 +64,13 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
         onCreateBoard={() => setIsCreateBoardModalOpen(true)}
         loading={loadingBoards}
         open={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(!isSidebarOpen)}
+        onClose={() => onSidebarOpenChange(!isSidebarOpen)}
       />
 
-      <Box 
-        sx={{ 
-          flexGrow: 1, 
-          marginLeft: { lg: isSidebarOpen ? "280px" : "24px" }, 
+      <Box
+        sx={{
+          flexGrow: 1,
+          marginLeft: { lg: isSidebarOpen ? "280px" : "24px" },
           transition: "margin 0.2s",
           width: { lg: `calc(100% - ${isSidebarOpen ? "280px" : "24px"})` },
           position: "relative",
@@ -104,9 +78,9 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
         }}
       >
         <Header />
-        <Container 
-          maxWidth="xl" 
-          sx={{ 
+        <Container
+          maxWidth="xl"
+          sx={{
             py: 4,
             px: { xs: 2, sm: 3 },
           }}
@@ -137,10 +111,10 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
                 onDragStart={onDragStart}
                 onDragOver={onDragOver}
                 onDrop={onDrop}
-                onTaskDeleted={onTaskDeleted}
                 onEditList={() => setEditingList(list)}
-                onDeleteList={() => handleDeleteList(list.id)}
-                onCreateTask={handleCreateTask}
+                onDeleteList={() => onDeleteList(list.id)}
+                onCreateTask={data => onCreateTask({ ...data, listId: list.id })}
+                onTaskDeleted={onTaskDeleted}
               />
             ))}
 
@@ -160,10 +134,7 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
       <CreateListModal
         open={isCreateListModalOpen}
         onClose={() => setIsCreateListModalOpen(false)}
-        onListCreated={() => {
-          onListCreated();
-          loadBoards();
-        }}
+        onListCreated={onListCreated}
         boardId={boardId}
       />
 
@@ -171,10 +142,7 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
         <EditListModal
           open={!!editingList}
           onClose={() => setEditingList(null)}
-          onListUpdated={() => {
-            onListUpdated();
-            loadBoards();
-          }}
+          onListUpdated={onListUpdated}
           list={editingList}
         />
       )}
@@ -182,7 +150,7 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
       <CreateBoardModal
         open={isCreateBoardModalOpen}
         onClose={() => setIsCreateBoardModalOpen(false)}
-        onBoardCreated={loadBoards}
+        onBoardCreated={onBoardCreated}
       />
     </Box>
   );

@@ -1,5 +1,6 @@
 import React from "react";
-import { ThemeProvider as MuiThemeProvider, createTheme } from "@mui/material";
+import { ThemeProvider as MuiThemeProvider } from "@mui/material";
+import { theme } from "./theme";
 
 export const colors = {
   primary: {
@@ -13,19 +14,8 @@ export const colors = {
     700: "#f57c00",
     800: "#ff8f00",
     900: "#ff6f00",
-  }
-} as const;
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      ...colors.primary,
-      light: colors.primary[100],
-      main: colors.primary[500],
-      dark: colors.primary[700],
-    },
   },
-});
+} as const;
 
 interface ThemeProviderProps {
   children: React.ReactNode;
@@ -33,4 +23,4 @@ interface ThemeProviderProps {
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   return <MuiThemeProvider theme={theme}>{children}</MuiThemeProvider>;
-}; 
+};
