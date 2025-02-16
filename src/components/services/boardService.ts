@@ -1,5 +1,8 @@
 import { supabase } from "../lib/supabase";
 import type { Board, List, Task } from "../../types/types";
+import { sendBoardInvitation } from './emailService';
+import { generateToken } from '../../utils/tokenGenerator';
+import type { User } from '@supabase/supabase-js';
 
 interface BoardWithCounts extends Board {
   total_tasks: number;
@@ -329,3 +332,102 @@ export async function updateUserPassword(newPassword: string) {
   const { error } = await supabase.auth.updateUser({ password: newPassword });
   if (error) throw error;
 }
+
+export const inviteUserToBoard = async (boardId: string, email: string, currentUser: User) => {
+  try {
+    const { data: boards, error: boardError } = await supabase
+      .from('boards')
+      .select('name')
+      .eq('id', boardId);
+
+    if (boardError) throw boardError;
+    if (!boards || boards.length === 0) {
+      throw new Error('Board not found');
+    }
+
+    const board = boards[0];
+    const invitationToken = generateToken();
+    
+    const { error: inviteError } = await supabase
+      .from('board_invitations')
+      .insert({
+        board_id: boardId,
+        email: email,
+        invitation_token: invitationToken,
+        invited_by: currentUser.id,
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      });
+
+    if (inviteError) throw inviteError;
+
+    const invitationResult = await sendBoardInvitation({
+      email,
+      boardName: board.name,
+      inviterName: currentUser.user_metadata.full_name || currentUser.email,
+      boardId,
+      invitationToken,
+    });
+
+    if (!invitationResult.success) {
+      await supabase
+        .from('board_invitations')
+        .delete()
+        .eq('board_id', boardId)
+        .eq('email', email);
+      
+      throw new Error(invitationResult.error?.message || 'Failed to send invitation email');
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Invitation Error:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error : new Error('An error occurred during the invitation process')
+    };
+  }
+};
+
+export const acceptBoardInvitation = async (boardId: string, token: string) => {
+  try {
+    const { data: invitation } = await supabase
+      .from('board_invitations')
+      .select('*')
+      .eq('board_id', boardId)
+      .eq('invitation_token', token)
+      .gt('expires_at', new Date().toISOString())
+      .single();
+
+    if (!invitation) {
+      throw new Error('Invalid or expired invitation');
+    }
+
+    const user = await supabase.auth.getUser();
+    if (!user.data.user) {
+      throw new Error('User not authenticated');
+    }
+
+    const { error: memberError } = await supabase
+      .from('board_members')
+      .insert({
+        board_id: boardId,
+        user_id: user.data.user.id,
+        role: 'member',
+      });
+
+    if (memberError) {
+      throw memberError;
+    }
+
+    await supabase
+      .from('board_invitations')
+      .delete()
+      .eq('board_id', boardId)
+      .eq('invitation_token', token);
+
+    return { success: true };
+  } catch (error) {
+    console.error('Accept Invitation Error:', error);
+    return { success: false, error };
+  }
+};

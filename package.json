@@ -17,6 +17,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.12",
     "@mui/material": "^5.15.12",
+    "@sendgrid/mail": "^8.1.4",
     "@supabase/supabase-js": "^2.39.7",
     "clsx": "^2.1.0",
     "lucide-react": "^0.344.0",

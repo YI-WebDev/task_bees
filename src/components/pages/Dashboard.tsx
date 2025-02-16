@@ -9,11 +9,13 @@ import {
   createTask,
   deleteList,
   getBoards,
+  createList,
 } from "../services/boardService";
 import { useAuth } from "../contexts/AuthContext";
 import { LoadingSpinner } from "../molecules/feedback/LoadingSpinner";
 import { ErrorMessage } from "../molecules/feedback/ErrorMessage";
 import { checkSupabaseConnection, handleSupabaseError } from "../lib/supabase";
+import { InviteBoardModal } from "../molecules/InviteBoardModal";
 
 export const Dashboard: React.FC = () => {
   const { boardId } = useParams();
@@ -24,6 +26,7 @@ export const Dashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
   const [draggedTask, setDraggedTask] = useState<{
     taskId: string;
@@ -200,6 +203,16 @@ export const Dashboard: React.FC = () => {
     setDraggedTask(null);
   };
 
+  const handleCreateList = async (title: string, color: string) => {
+    if (!boardId) return;
+    try {
+      const newList = await createList({ title, color, board_id: boardId });
+      setLists([...lists, newList]);
+    } catch (error) {
+      console.error("Error creating list:", error);
+    }
+  };
+
   if (loading) {
     return <LoadingSpinner fullScreen />;
   }
@@ -209,22 +222,29 @@ export const Dashboard: React.FC = () => {
   }
 
   return (
-    <DashboardTemplate
-      boardId={boardId!}
-      lists={lists}
-      boards={boards}
-      loadingBoards={loadingBoards}
-      isSidebarOpen={isSidebarOpen}
-      onSidebarOpenChange={setIsSidebarOpen}
-      onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-      onCreateTask={handleCreateTask}
-      onDeleteList={handleDeleteList}
-      onBoardCreated={loadBoards}
-      onListCreated={loadBoardData}
-      onListUpdated={loadBoardData}
-      onTaskDeleted={loadBoardData}
-    />
+    <>
+      <DashboardTemplate
+        boardId={boardId!}
+        lists={lists}
+        boards={boards}
+        loadingBoards={loadingBoards}
+        isSidebarOpen={isSidebarOpen}
+        onSidebarOpenChange={setIsSidebarOpen}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+        onCreateTask={handleCreateTask}
+        onDeleteList={handleDeleteList}
+        onBoardCreated={loadBoards}
+        onListCreated={loadBoardData}
+        onListUpdated={loadBoardData}
+        onTaskDeleted={loadBoardData}
+      />
+      <InviteBoardModal
+        open={isInviteModalOpen}
+        onClose={() => setIsInviteModalOpen(false)}
+        boardId={boardId!}
+      />
+    </>
   );
 };

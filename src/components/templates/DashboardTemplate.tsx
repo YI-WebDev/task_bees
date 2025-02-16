@@ -11,6 +11,8 @@ import { EditListModal } from "../molecules/EditListModal";
 import { EmptyState } from "../molecules/data-display/EmptyState";
 import { Sidebar } from "../molecules/navigation/Sidebar";
 import { CreateBoardModal } from "../molecules/CreateBoardModal";
+import { InviteBoardModal } from '../molecules/InviteBoardModal';
+import { PersonAddAlt1 as InviteIcon } from '@mui/icons-material';
 
 interface DashboardTemplateProps {
   boardId: string;
@@ -55,6 +57,7 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
   const [isCreateListModalOpen, setIsCreateListModalOpen] = useState(false);
   const [isCreateBoardModalOpen, setIsCreateBoardModalOpen] = useState(false);
   const [editingList, setEditingList] = useState<ListType | null>(null);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "primary.50", display: "flex" }}>
@@ -85,14 +88,23 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
             px: { xs: 2, sm: 3 },
           }}
         >
-          <Box className="flex items-center mb-6">
-            <Button
-              onClick={() => setIsCreateListModalOpen(true)}
-              icon={<Plus className="w-4 h-4" />}
-              className="bg-white text-amber-600 hover:bg-amber-50"
-            >
-              Add List
-            </Button>
+          <Box className="flex items-center justify-between mb-6">
+            <Box className="flex gap-2">
+              <Button
+                onClick={() => setIsCreateListModalOpen(true)}
+                icon={<Plus className="w-4 h-4" />}
+                className="bg-white text-amber-600 hover:bg-amber-50"
+              >
+                Add List
+              </Button>
+              <Button
+                onClick={() => setIsInviteModalOpen(true)}
+                icon={<InviteIcon className="w-4 h-4" />}
+                className="bg-white text-amber-600 hover:bg-amber-50"
+              >
+                Invite
+              </Button>
+            </Box>
           </Box>
 
           <Box
@@ -151,6 +163,12 @@ export const DashboardTemplate: React.FC<DashboardTemplateProps> = ({
         open={isCreateBoardModalOpen}
         onClose={() => setIsCreateBoardModalOpen(false)}
         onBoardCreated={onBoardCreated}
+      />
+
+      <InviteBoardModal
+        open={isInviteModalOpen}
+        onClose={() => setIsInviteModalOpen(false)}
+        boardId={boardId}
       />
     </Box>
   );
