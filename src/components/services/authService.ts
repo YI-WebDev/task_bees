@@ -6,6 +6,8 @@ interface ProfileUpdateData {
   updated_at: string;
 }
 
+const redirectUrl = import.meta.env.VITE_SUPABASE_REDIRECT_URL;
+
 export async function signIn(email: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
@@ -24,7 +26,7 @@ export async function signInWithGoogle() {
         access_type: 'offline',
         prompt: 'consent',
       },
-      redirectTo: `${window.location.origin}/boards`,
+      redirectTo: redirectUrl,
     },
   });
 
