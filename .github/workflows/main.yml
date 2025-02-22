@@ -30,5 +30,8 @@ jobs:
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          VITE_SUPABASE_REDIRECT_URL: ${{ secrets.VITE_SUPABASE_REDIRECT_URL }}
+          VITE_SENDGRID_API_KEY: ${{ secrets.VITE_SENDGRID_API_KEY }}
+          VITE_SENDGRID_FROM_EMAIL: ${{ secrets.VITE_SENDGRID_FROM_EMAIL }}
         with:
           args: deploy --dir=dist --prod
