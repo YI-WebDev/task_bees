@@ -16,7 +16,6 @@ serve(async req => {
   try {
     const { to, subject, text, html } = (await req.json()) as EmailPayload;
 
-    // SendGridのAPIキーを取得
     const apiKey = Deno.env.get("SENDGRID_API_KEY");
     const fromEmail = Deno.env.get("SENDGRID_FROM_EMAIL");
 
